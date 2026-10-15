@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./FavouritePersonActivity2Intro.css";
 
 function FavouritePersonActivity3Intro({ onFinish }) {
   const [show, setShow] = useState(false);

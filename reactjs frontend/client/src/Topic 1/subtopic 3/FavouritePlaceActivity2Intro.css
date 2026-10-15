@@ -1,41 +1,27 @@
 /* ===================================
-   FAVOURITE PLACE ACTIVITY 3 INTRO
+   FAVOURITE PLACE ACTIVITY 2 INTRO
 =================================== */
 
-.favourite-place-activity3-intro-container {
-
+.favourite-place-intro-container {
   position: fixed;
-
   inset: 0;
-
   z-index: 9999;
 
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
   background-image: url("../../assets/chatbg.jpeg");
-
   background-size: cover;
-
   background-position: center;
-
   background-repeat: no-repeat;
 }
 
 
-/* ===================================
-   DARK BLURRED OVERLAY
-=================================== */
-
-.favourite-place-activity3-intro-container::before {
-
+.favourite-place-intro-container::before {
   content: "";
 
   position: absolute;
-
   inset: 0;
 
   background: rgba(0, 0, 0, 0.30);
@@ -44,26 +30,17 @@
 }
 
 
-/* ===================================
-   INTRO POPUP
-=================================== */
-
-.favourite-place-activity3-intro-popup {
-
+.favourite-place-intro-popup {
   width: 1000px;
-
   height: 420px;
 
   background: #D8B48A;
 
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
   position: relative;
-
   z-index: 2;
 
   box-shadow:
@@ -81,37 +58,24 @@
   );
 
   transform: scale(0.5);
-
   opacity: 0;
 
   transition: 0.5s ease;
 }
 
 
-/* ===================================
-   POPUP SHOW ANIMATION
-=================================== */
-
-.favourite-place-activity3-intro-popup.show {
-
+.favourite-place-intro-popup.show {
   transform: scale(1);
-
   opacity: 1;
 }
 
 
-/* ===================================
-   TITLE
-=================================== */
-
-.favourite-place-activity3-intro-popup h1 {
-
+.favourite-place-intro-popup h1 {
   margin: 0;
 
   padding: 0 50px;
 
   font-size: 64px;
-
   font-weight: 800;
 
   color: #5A3620;
@@ -124,25 +88,30 @@
 }
 
 
-/* ===================================
-   RESPONSIVE
-=================================== */
+@media (max-width: 800px) {
 
-@media (max-width: 768px) {
-
-  .favourite-place-activity3-intro-popup {
-
+  .favourite-place-intro-popup {
     width: 90%;
-
     height: 260px;
   }
 
-
-  .favourite-place-activity3-intro-popup h1 {
-
+  .favourite-place-intro-popup h1 {
     font-size: 36px;
-
     padding: 0 25px;
+  }
+
+}
+
+
+@media (max-width: 320px) {
+
+  .favourite-place-intro-popup {
+    height: 230px;
+  }
+
+  .favourite-place-intro-popup h1 {
+    font-size: 28px;
+    padding: 0 15px;
   }
 
 }

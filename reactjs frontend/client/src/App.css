@@ -5,27 +5,28 @@
   padding: 0; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
   background-color: #f1f5f9; 
-  min-height: 100vh; 
+  min-height: 100dvh; 
 } 
  
 /* --- PAGE 1: HOME PAGE STYLES --- */ 
  
-.home-container{ 
-  width:100%; 
-  height:100vh; 
- 
-  background:url("/src/homepage.png"); 
-  background-size:cover; 
-  background-position:center; 
-  background-repeat:no-repeat; 
- 
-  display:flex; 
-  justify-content:center; 
-  align-items:center; 
- 
-  font-family:Poppins,sans-serif; 
- 
-  overflow:hidden; 
+.home-container{
+  width:100%;
+  height:100vh;
+  min-height:100dvh;
+
+  background:url("/src/homepage.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-family:Poppins,sans-serif;
+
+  overflow:hidden;
 } 
  
 .home-content{ 
@@ -178,21 +179,22 @@
  
 /*-----Registration-----*/ 
  
-.auth-page { 
-  width: 100%; 
-  height: 100vh; 
- 
-  background: url("/src/ragisterpage.png"); 
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
- 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
- 
-  font-family: Poppins, sans-serif; 
-  overflow: hidden; 
+.auth-page {
+  width: 100%;
+  height: 100vh;
+  min-height: 100dvh;
+
+  background: url("/src/ragisterpage.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: Poppins, sans-serif;
+  overflow: hidden;
 } 
  
 .auth-card { 
@@ -220,25 +222,38 @@
   margin-bottom: 25px; 
 } 
  
-.auth-card input { 
-  width: 100%; 
-  padding: 15px 20px; 
- 
-  margin-bottom: 14px; 
- 
-  border: none; 
-  outline: none; 
- 
-  border-radius: 14px; 
- 
-  font-size: 17px; 
- 
-  background: rgba(14, 13, 13, 0.9); 
- 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
- 
-  box-sizing: border-box; 
-} 
+.auth-card input,
+.auth-card select {
+  width: 100%;
+  padding: 15px 20px;
+
+  margin-bottom: 14px;
+
+  border: none;
+  outline: none;
+
+  border-radius: 14px;
+
+  font-size: 17px;
+
+  background: rgba(14, 13, 13, 0.9);
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+  box-sizing: border-box;
+  color: #ffffff;
+  font-family: Poppins, sans-serif;
+  appearance: none;
+  background-image: none;
+}
+.auth-card select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 24 14'%3E%3Cpath fill='%23ffffff' d='M12 0L0 12h24L12 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+  padding-right: 40px;
+}
+
  
 .auth-card button { 
   width: 100%; 
@@ -268,13 +283,52 @@
  
 .back-btn { 
   margin-top: 12px !important; 
- 
+  
   background: rgba(65, 66, 9, 0.95) !important; 
   color: #f8f2f2 !important; 
 } 
- 
+
+/* --- Auth helper: error message --- */ 
+.auth-error { 
+  width: 100%; 
+  padding: 12px 16px; 
+  margin: 10px 0 4px; 
+  text-align: center; 
+  color: #ffffff; 
+  background: rgba(220, 38, 38, 0.9); 
+  border-radius: 12px; 
+  font-size: 15px; 
+  font-weight: 600; 
+  box-sizing: border-box; 
+} 
+  
+/* --- Auth helper: toggle link area --- */ 
+.auth-toggle { 
+  margin-top: 14px; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 6px; 
+  font-size: 14px; 
+} 
+  
+.auth-toggle span { 
+  color: rgba(255, 255, 255, 0.85); 
+} 
+  
+/* --- Auth helper: inline link button --- */ 
+.link-btn { 
+  all: unset; 
+  color: #ffd166; 
+  font-weight: 700; 
+  cursor: pointer; 
+  text-decoration: underline; 
+  padding: 0; 
+  font-size: 14px; 
+} 
+  
 /* =====================================================
-   REGISTRATION — MOBILE
+    REGISTRATION — MOBILE
 ===================================================== */ 
  
 @media (max-width: 768px) { 
@@ -295,8 +349,9 @@
     font-size: 36px; 
   } 
  
-  .auth-card input { 
-    font-size: 16px; 
+  .auth-card input,
+  .auth-card select {
+    font-size: 16px;
   } 
  
   .auth-card button { 
@@ -319,7 +374,8 @@
     margin-bottom:20px;
   }
 
-  .auth-card input{
+  .auth-card input,
+  .auth-card select{
     padding:13px 16px;
     font-size:15px;
   }
@@ -346,6 +402,7 @@
 .pathway-main-container{
   width:100%;
   height:100vh;
+  min-height:100dvh;
 
   background:url("/pathwaypage.jpeg") center center no-repeat;
   background-size:cover;
@@ -698,7 +755,7 @@ body,
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* =========================
@@ -708,6 +765,7 @@ body,
 .tp-page {
   width: 100vw;
   height: 100vh;
+  min-height: 100dvh;
 
   display: flex;
   justify-content: center;
@@ -750,6 +808,7 @@ body,
 
   width: 100vw;
   height: 100vh;
+  min-height: 100dvh;
 
   overflow: hidden;
 }
@@ -1038,6 +1097,7 @@ body,
 
   width:100vw;
   height:100vh;
+  min-height:100dvh;
 
   position:relative;
 
@@ -1809,6 +1869,7 @@ body,
 .chat-page{
   width:100vw;
   height:100vh;
+  min-height:100dvh;
 
   position:relative;
 
@@ -2603,6 +2664,149 @@ object-fit:contain;
 }
 
 
+/* =====================================================
+   BACK + SKIP BUTTON
+   SAME SIZE / SAME STYLE
+===================================================== */
+
+.chat-back,
+.skip-btn{
+  position:absolute;
+
+  top:20px;
+
+  border:none;
+
+  padding:12px 24px;
+
+  border-radius:30px;
+
+  background:#f6a623;
+
+  color:white;
+
+  font-size:16px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  z-index:100;
+
+  min-width:120px;
+
+  height:48px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+}
+
+
+/* BACK — LEFT */
+
+.chat-back{
+  left:20px;
+}
+
+
+/* SKIP — RIGHT */
+
+.skip-btn{
+  right:20px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:768px){
+
+  .chat-back,
+  .skip-btn{
+    top:14px;
+
+    padding:9px 17px;
+
+    font-size:14px;
+
+    border-radius:25px;
+
+    min-width:100px;
+
+    height:40px;
+  }
+
+
+  .chat-back{
+    left:14px;
+  }
+
+
+  .skip-btn{
+    right:14px;
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media(max-width:400px){
+
+  .chat-back,
+  .skip-btn{
+    top:11px;
+
+    padding:8px 14px;
+
+    font-size:13px;
+
+    min-width:88px;
+
+    height:36px;
+
+    border-radius:25px;
+  }
+
+
+  .chat-back{
+    left:11px;
+  }
+
+
+  .skip-btn{
+    right:11px;
+  }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media(max-width:350px){
+
+  .chat-back,
+  .skip-btn{
+    min-width:82px;
+
+    height:34px;
+
+    padding:7px 12px;
+
+    font-size:12px;
+  }
+
+}
+
+
 /* ===================================
    VOCABULARY INTRO
 =================================== */
@@ -2822,15 +3026,35 @@ object-fit:contain;
     }
 
 }
+
+
+
+
 /* =====================================================
    QUESTION / VOCABULARY ACTIVITY
    WARM WOODEN THEME
+===================================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+}
+
+
+/* =====================================================
+   PAGE
 ===================================================== */
 
 .qv-page{
 
     width:100vw;
     height:100vh;
+    min-height:100dvh;
 
     position:relative;
 
@@ -2957,6 +3181,8 @@ object-fit:contain;
     position:relative;
 
     z-index:10;
+
+    flex-shrink:0;
 
 }
 
@@ -3087,6 +3313,8 @@ object-fit:contain;
 
     flex:1;
 
+    min-height:0;
+
     display:flex;
 
     align-items:center;
@@ -3121,6 +3349,8 @@ object-fit:contain;
     align-items:center;
 
     position:relative;
+
+    flex-shrink:0;
 
 }
 
@@ -3329,6 +3559,8 @@ object-fit:contain;
 
     width:66%;
 
+    min-width:0;
+
     display:flex;
 
     flex-direction:column;
@@ -3336,6 +3568,8 @@ object-fit:contain;
     align-items:center;
 
     justify-content:center;
+
+    flex-shrink:0;
 
 }
 
@@ -3480,6 +3714,8 @@ object-fit:contain;
 
     margin-top:22px;
 
+    flex-shrink:0;
+
 }
 
 
@@ -3508,6 +3744,8 @@ object-fit:contain;
         0 10px 22px rgba(85,55,25,.16);
 
     transition:.3s ease;
+
+    flex-shrink:0;
 
 }
 
@@ -3772,6 +4010,8 @@ object-fit:contain;
 
     transition:.25s;
 
+    flex-shrink:0;
+
 }
 
 
@@ -4001,56 +4241,33 @@ object-fit:contain;
 
 
 .qv-red{
-
     left:8%;
-
     background:#e45757;
-
 }
-
 
 .qv-blue{
-
     left:24%;
-
     background:#5c91d9;
-
 }
-
 
 .qv-yellow{
-
     left:40%;
-
     background:#f4c84c;
-
 }
-
 
 .qv-green{
-
     left:56%;
-
     background:#68a94c;
-
 }
-
 
 .qv-pink{
-
     left:72%;
-
     background:#e77ca9;
-
 }
 
-
 .qv-purple{
-
     left:88%;
-
     background:#9a72c4;
-
 }
 
 
@@ -4152,10 +4369,27 @@ object-fit:contain;
 
 
 /* =====================================================
-   MOBILE
+   MOBILE FIX
+   ONLY MOBILE BEHAVIOUR CHANGED
 ===================================================== */
 
 @media (max-width:800px){
+
+    html,
+    body{
+
+        width:100%;
+
+        height:100%;
+
+        margin:0;
+
+        padding:0;
+
+        overflow:hidden;
+
+    }
+
 
     .qv-page{
 
@@ -4165,39 +4399,79 @@ object-fit:contain;
 
         min-height:100dvh;
 
-        padding:8px;
+        padding:5px;
 
         overflow:hidden;
+
+        align-items:center;
 
     }
 
 
+    /* =================================================
+       MAIN CARD
+       THIS IS THE IMPORTANT FIX
+    ================================================= */
+
     .qv-main-card{
 
-        width:96%;
+        width:98%;
 
-        height:94dvh;
+        height:96dvh;
 
-        max-height:94dvh;
+        max-height:96dvh;
 
-        padding:14px;
+        min-height:0;
 
-        border-radius:28px;
+        padding:12px 9px;
 
-        overflow-y:auto;
+        border-radius:25px;
 
         overflow-x:hidden;
 
+        overflow-y:auto;
+
         -webkit-overflow-scrolling:touch;
+
+        scrollbar-width:thin;
+
+        scrollbar-color:#b58a43 transparent;
+
+        display:flex;
+
+        flex-direction:column;
+
+    }
+
+
+    .qv-main-card::-webkit-scrollbar{
+
+        width:6px;
+
+    }
+
+
+    .qv-main-card::-webkit-scrollbar-track{
+
+        background:transparent;
+
+    }
+
+
+    .qv-main-card::-webkit-scrollbar-thumb{
+
+        background:#b58a43;
+
+        border-radius:20px;
 
     }
 
 
     .qv-main-card::before{
 
-        inset:7px;
+        inset:6px;
 
-        border-radius:22px;
+        border-radius:20px;
 
     }
 
@@ -4210,13 +4484,19 @@ object-fit:contain;
 
         width:100%;
 
+        flex-shrink:0;
+
         display:grid;
 
-        grid-template-columns:auto 1fr auto;
+        grid-template-columns:auto minmax(0,1fr) auto;
 
-        align-items:start;
+        align-items:flex-start;
 
-        gap:8px;
+        gap:5px;
+
+        position:relative;
+
+        z-index:10;
 
     }
 
@@ -4224,11 +4504,15 @@ object-fit:contain;
     .qv-back-btn,
     .qv-skip-btn{
 
-        padding:8px 13px;
+        min-width:0;
 
-        font-size:13px;
+        height:38px;
+
+        padding:7px 11px;
 
         border-radius:22px;
+
+        font-size:12px;
 
         white-space:nowrap;
 
@@ -4241,18 +4525,18 @@ object-fit:contain;
 
         min-width:0;
 
-        gap:5px;
+        gap:4px;
 
     }
 
 
     .qv-question-count{
 
-        font-size:17px;
+        font-size:15px;
 
-        padding:5px 12px;
+        padding:4px 9px;
 
-        border-radius:12px;
+        border-radius:11px;
 
         white-space:nowrap;
 
@@ -4265,24 +4549,40 @@ object-fit:contain;
 
         max-width:180px;
 
-        height:8px;
+        height:7px;
 
     }
 
 
     /* =================================================
        CONTENT
+       IMPORTANT:
+       NO FIXED HEIGHT HERE
     ================================================= */
 
     .qv-content{
 
         width:100%;
 
+        height:auto;
+
+        min-height:0;
+
+        flex:0 0 auto;
+
+        display:flex;
+
         flex-direction:column;
 
-        gap:15px;
+        align-items:center;
 
-        padding:15px 0 30px;
+        justify-content:flex-start;
+
+        gap:14px;
+
+        padding:12px 0 80px;
+
+        overflow:visible;
 
     }
 
@@ -4297,18 +4597,49 @@ object-fit:contain;
 
         height:auto;
 
-        min-height:250px;
+        min-height:225px;
 
         flex-shrink:0;
+
+        display:flex;
+
+        flex-direction:column;
+
+        justify-content:center;
+
+        align-items:center;
+
+    }
+
+
+    .qv-teacher-image-wrap{
+
+        width:100%;
+
+        height:auto;
+
+        min-height:190px;
+
+        display:flex;
+
+        justify-content:center;
+
+        align-items:center;
+
+        position:relative;
 
     }
 
 
     .qv-teacher-img{
 
-        width:190px;
+        width:170px;
 
-        max-height:300px;
+        height:auto;
+
+        max-width:60%;
+
+        max-height:220px;
 
     }
 
@@ -4319,521 +4650,17 @@ object-fit:contain;
 
         right:3%;
 
-        width:175px;
-
-        min-height:75px;
-
-        padding:15px 16px;
-
-        font-size:14px;
-
-        line-height:1.3;
-
-    }
-
-
-    .qv-teacher-bubble::after{
-
-        width:25px;
-
-        height:25px;
-
-        bottom:-15px;
-
-        left:35px;
-
-    }
-
-
-    .qv-teacher-name{
-
-        margin-top:-8px;
-
-        padding:8px 22px;
-
-        font-size:17px;
-
-        border-radius:14px;
-
-    }
-
-
-    /* =================================================
-       ACTIVITY
-    ================================================= */
-
-    .qv-activity{
-
-        width:100%;
-
-        flex-shrink:0;
-
-    }
-
-
-    /* =================================================
-       QUESTION PANEL
-    ================================================= */
-
-    .qv-question-panel{
-
-        width:96%;
-
-        min-height:115px;
-
-        padding:16px 18px;
-
-        border-radius:20px;
-
-    }
-
-
-    .qv-question-panel::before{
-
-        inset:6px;
-
-        border-radius:14px;
-
-    }
-
-
-    .qv-question-label{
-
-        font-size:16px;
-
-    }
-
-
-    .qv-prompt{
-
-        font-size:28px;
-
-        letter-spacing:1px;
-
-        line-height:1.15;
-
-    }
-
-
-    .qv-panel-decoration{
-
-        font-size:18px;
-
-        top:5px;
-
-    }
-
-
-    .qv-panel-line{
-
-        font-size:13px;
-
-        bottom:3px;
-
-    }
-
-
-    /* =================================================
-       FOOD OPTIONS
-    ================================================= */
-
-    .qv-food-options{
-
-        width:100%;
-
-        flex-direction:column;
-
-        align-items:center;
-
-        gap:15px;
-
-        margin-top:16px;
-
-    }
-
-
-    .qv-food-card{
-
-        width:92%;
-
-        max-width:360px;
-
-        border-radius:22px;
-
-        padding:8px;
-
-    }
-
-
-    .qv-food-image-wrap{
-
-        width:100%;
-
-        height:180px;
-
-        border-radius:16px;
-
-    }
-
-
-    .qv-food-name{
-
-        margin-top:8px;
-
-        min-height:48px;
-
-        border-radius:18px;
-
-        gap:10px;
-
-        font-size:20px;
-
-    }
-
-
-    .qv-food-name span{
-
-        font-size:14px;
-
-    }
-
-
-    /* =================================================
-       TIP
-    ================================================= */
-
-    .qv-tip-box{
-
-        width:92%;
-
-        margin-top:15px;
-
-        padding:9px 14px;
-
-        gap:10px;
-
-        font-size:13px;
-
-        text-align:center;
-
-    }
-
-
-    .qv-tip-icon{
-
-        font-size:19px;
-
-    }
-
-
-    .qv-tip-star{
-
-        font-size:17px;
-
-    }
-
-
-    /* =================================================
-       PRACTICE
-    ================================================= */
-
-    .qv-practice-section{
-
-        width:100%;
-
-    }
-
-
-    .qv-practice-title{
-
-        font-size:25px;
-
-        margin-bottom:14px;
-
-        text-align:center;
-
-    }
-
-
-    .qv-practice-card{
-
-        width:94%;
-
-        max-width:400px;
-
-        flex-direction:column;
-
-        align-items:center;
-
-        border-radius:22px;
-
-    }
-
-
-    .qv-practice-image{
-
-        width:100%;
-
-        height:150px;
-
-    }
-
-
-    .qv-practice-word{
-
-        width:100%;
-
-        min-width:0;
-
-        padding:15px;
-
-        font-size:40px;
-
-    }
-
-
-    .qv-practice-text{
-
-        font-size:16px;
-
-        text-align:center;
-
-    }
-
-
-    .qv-mic-btn{
-
-        width:70px;
-
-        height:70px;
-
-        font-size:30px;
-
-    }
-
-
-    /* =================================================
-       WORD BUILDER
-    ================================================= */
-
-    .qv-builder-section{
-
-        width:100%;
-
-    }
-
-
-    .qv-builder-section h2{
-
-        font-size:24px;
-
-        text-align:center;
-
-    }
-
-
-    .qv-blank-word{
-
-        gap:7px;
-
-        margin:14px 0;
-
-        flex-wrap:wrap;
-
-        justify-content:center;
-
-    }
-
-
-    .qv-blank-box{
-
-        width:45px;
-
-        height:45px;
-
-        border-radius:11px;
-
-        font-size:22px;
-
-    }
-
-
-    .qv-letter-container{
-
-        width:94%;
-
-        max-width:400px;
-
-        gap:8px;
-
-    }
-
-
-    .qv-letter-btn{
-
-        width:48px;
-
-        height:48px;
-
-        border-radius:12px;
-
-        font-size:21px;
-
-    }
-
-
-    .qv-reset-btn{
-
-        margin-top:14px;
-
-        padding:9px 22px;
-
-        font-size:15px;
-
-    }
-
-
-    /* =================================================
-       FEEDBACK
-    ================================================= */
-
-    .qv-feedback{
-
-        bottom:12px;
-
-        width:max-content;
-
-        max-width:85%;
-
-        padding:9px 18px;
-
-        font-size:17px;
-
-        text-align:center;
-
-    }
-
-}
-
-
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
-
-@media (max-width:500px){
-
-    .qv-page{
-
-        padding:6px;
-
-    }
-
-
-    .qv-main-card{
-
-        width:98%;
-
-        height:96dvh;
-
-        max-height:96dvh;
-
-        padding:10px;
-
-        border-radius:24px;
-
-    }
-
-
-    .qv-main-card::before{
-
-        inset:6px;
-
-        border-radius:19px;
-
-    }
-
-
-    /* =================================================
-       HEADER
-    ================================================= */
-
-    .qv-header{
-
-        gap:5px;
-
-    }
-
-
-    .qv-back-btn,
-    .qv-skip-btn{
-
-        padding:7px 10px;
-
-        font-size:11px;
-
-    }
-
-
-    .qv-question-count{
-
-        font-size:14px;
-
-        padding:4px 8px;
-
-    }
-
-
-    .qv-progress-bar{
-
-        max-width:130px;
-
-        height:7px;
-
-    }
-
-
-    /* =================================================
-       CONTENT
-    ================================================= */
-
-    .qv-content{
-
-        gap:10px;
-
-        padding-top:10px;
-
-    }
-
-
-    /* =================================================
-       TEACHER
-    ================================================= */
-
-    .qv-teacher-section{
-
-        min-height:220px;
-
-    }
-
-
-    .qv-teacher-img{
-
-        width:155px;
-
-        max-height:240px;
-
-    }
-
-
-    .qv-teacher-bubble{
-
-        width:145px;
+        width:160px;
 
         min-height:65px;
 
         padding:11px 12px;
 
         font-size:12px;
+
+        line-height:1.3;
+
+        border-width:2px;
 
     }
 
@@ -4848,14 +4675,45 @@ object-fit:contain;
 
         left:28px;
 
+        border-width:2px;
+
     }
 
 
     .qv-teacher-name{
 
-        padding:6px 17px;
+        margin-top:-5px;
 
-        font-size:14px;
+        padding:7px 18px;
+
+        font-size:15px;
+
+        border-radius:13px;
+
+    }
+
+
+    /* =================================================
+       ACTIVITY
+    ================================================= */
+
+    .qv-activity{
+
+        width:100%;
+
+        height:auto;
+
+        min-height:0;
+
+        flex-shrink:0;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        justify-content:flex-start;
 
     }
 
@@ -4866,37 +4724,64 @@ object-fit:contain;
 
     .qv-question-panel{
 
-        width:98%;
+        width:96%;
 
-        min-height:100px;
+        min-height:105px;
+
+        height:auto;
 
         padding:13px 12px;
+
+        border-width:2px;
+
+        border-radius:18px;
+
+        flex-shrink:0;
+
+    }
+
+
+    .qv-question-panel::before{
+
+        inset:6px;
+
+        border-radius:13px;
 
     }
 
 
     .qv-question-label{
 
-        font-size:14px;
+        font-size:15px;
 
     }
 
 
     .qv-prompt{
 
-        font-size:23px;
+        font-size:25px;
+
+        line-height:1.15;
+
+        letter-spacing:1px;
+
+        word-break:break-word;
 
     }
 
 
     .qv-panel-decoration{
 
-        font-size:15px;
+        top:5px;
+
+        font-size:17px;
 
     }
 
 
     .qv-panel-line{
+
+        bottom:3px;
 
         font-size:11px;
 
@@ -4904,14 +4789,28 @@ object-fit:contain;
 
 
     /* =================================================
-       FOOD
+       FOOD OPTIONS
     ================================================= */
 
     .qv-food-options{
 
+        width:100%;
+
+        height:auto;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        justify-content:flex-start;
+
         gap:12px;
 
         margin-top:12px;
+
+        flex-shrink:0;
 
     }
 
@@ -4920,23 +4819,61 @@ object-fit:contain;
 
         width:94%;
 
-        max-width:330px;
+        max-width:350px;
+
+        height:auto;
+
+        flex-shrink:0;
+
+        padding:7px;
+
+        border-width:2px;
+
+        border-radius:18px;
+
+    }
+
+
+    .qv-food-card:hover{
+
+        transform:none;
 
     }
 
 
     .qv-food-image-wrap{
 
+        width:100%;
+
         height:145px;
+
+        border-radius:13px;
+
+    }
+
+
+    .qv-food-image{
+
+        width:100%;
+
+        height:100%;
+
+        object-fit:cover;
 
     }
 
 
     .qv-food-name{
 
-        min-height:43px;
+        min-height:45px;
 
-        font-size:18px;
+        margin-top:6px;
+
+        border-radius:16px;
+
+        gap:8px;
+
+        font-size:17px;
 
     }
 
@@ -4954,25 +4891,41 @@ object-fit:contain;
 
     .qv-tip-box{
 
-        width:96%;
+        width:94%;
+
+        height:auto;
+
+        min-height:40px;
+
+        margin-top:12px;
+
+        padding:8px 10px;
+
+        gap:8px;
 
         font-size:11px;
 
-        padding:8px 10px;
+        text-align:center;
+
+        flex-shrink:0;
 
     }
 
 
     .qv-tip-icon{
 
-        font-size:16px;
+        font-size:17px;
+
+        flex-shrink:0;
 
     }
 
 
     .qv-tip-star{
 
-        font-size:14px;
+        font-size:15px;
+
+        flex-shrink:0;
 
     }
 
@@ -4981,23 +4934,75 @@ object-fit:contain;
        PRACTICE
     ================================================= */
 
+    .qv-practice-section{
+
+        width:100%;
+
+        height:auto;
+
+        flex-shrink:0;
+
+    }
+
+
     .qv-practice-title{
 
-        font-size:21px;
+        font-size:22px;
+
+        margin:0 0 12px;
+
+        text-align:center;
+
+    }
+
+
+    .qv-practice-card{
+
+        width:94%;
+
+        max-width:390px;
+
+        height:auto;
+
+        min-height:0;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        overflow:hidden;
+
+        border-radius:20px;
+
+        flex-shrink:0;
 
     }
 
 
     .qv-practice-image{
 
+        width:100%;
+
         height:125px;
+
+        object-fit:cover;
 
     }
 
 
     .qv-practice-word{
 
-        font-size:32px;
+        width:100%;
+
+        min-width:0;
+
+        min-height:65px;
+
+        padding:10px;
+
+        font-size:34px;
 
     }
 
@@ -5006,16 +5011,24 @@ object-fit:contain;
 
         font-size:14px;
 
+        text-align:center;
+
     }
 
 
     .qv-mic-btn{
 
-        width:62px;
+        width:65px;
 
-        height:62px;
+        height:65px;
 
-        font-size:26px;
+        min-width:65px;
+
+        min-height:65px;
+
+        margin:8px 0 12px;
+
+        font-size:28px;
 
     }
 
@@ -5024,44 +5037,135 @@ object-fit:contain;
        WORD BUILDER
     ================================================= */
 
+    .qv-builder-section{
+
+        width:100%;
+
+        height:auto;
+
+        flex-shrink:0;
+
+        padding-bottom:20px;
+
+    }
+
+
     .qv-builder-section h2{
 
-        font-size:21px;
+        font-size:22px;
+
+        text-align:center;
+
+        margin:8px 0;
+
+    }
+
+
+    .qv-blank-word{
+
+        width:100%;
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+        gap:6px;
+
+        margin:12px 0;
 
     }
 
 
     .qv-blank-box{
 
-        width:40px;
+        width:42px;
 
-        height:40px;
+        height:42px;
 
-        font-size:19px;
+        border-radius:10px;
+
+        font-size:20px;
+
+        flex-shrink:0;
+
+    }
+
+
+    .qv-letter-container{
+
+        width:96%;
+
+        max-width:390px;
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+        gap:7px;
 
     }
 
 
     .qv-letter-btn{
 
-        width:43px;
+        width:45px;
 
-        height:43px;
+        height:45px;
+
+        border-radius:10px;
 
         font-size:19px;
+
+        flex-shrink:0;
 
     }
 
 
+    .qv-reset-btn{
+
+        margin-top:13px;
+
+        padding:8px 20px;
+
+        font-size:14px;
+
+    }
+
+
+    /* =================================================
+       FEEDBACK
+       DOES NOT COVER CONTENT
+    ================================================= */
+
     .qv-feedback{
+
+        position:sticky;
+
+        left:auto;
 
         bottom:8px;
 
-        max-width:88%;
+        transform:none;
 
-        padding:8px 14px;
+        width:max-content;
+
+        max-width:90%;
+
+        margin:0 auto;
+
+        padding:7px 14px;
 
         font-size:14px;
+
+        text-align:center;
+
+        z-index:30;
+
+        flex-shrink:0;
 
     }
 
@@ -5069,23 +5173,20 @@ object-fit:contain;
 
 
 /* =====================================================
-   VERY SMALL MOBILE
+   SMALL MOBILE
 ===================================================== */
 
-@media (max-width:360px){
-
-    .qv-page{
-
-        padding:4px;
-
-    }
-
+@media (max-width:500px){
 
     .qv-main-card{
 
         width:99%;
 
-        padding:8px;
+        height:97dvh;
+
+        max-height:97dvh;
+
+        padding:9px 7px;
 
         border-radius:22px;
 
@@ -5096,17 +5197,26 @@ object-fit:contain;
 
         inset:5px;
 
-        border-radius:18px;
+        border-radius:17px;
 
     }
 
 
     /* HEADER */
 
+    .qv-header{
+
+        gap:4px;
+
+    }
+
+
     .qv-back-btn,
     .qv-skip-btn{
 
-        padding:6px 8px;
+        height:35px;
+
+        padding:6px 9px;
 
         font-size:10px;
 
@@ -5115,16 +5225,31 @@ object-fit:contain;
 
     .qv-question-count{
 
-        font-size:12px;
+        font-size:13px;
 
-        padding:4px 6px;
+        padding:4px 7px;
 
     }
 
 
     .qv-progress-bar{
 
-        max-width:105px;
+        max-width:135px;
+
+        height:6px;
+
+    }
+
+
+    /* CONTENT */
+
+    .qv-content{
+
+        gap:9px;
+
+        padding-top:9px;
+
+        padding-bottom:85px;
 
     }
 
@@ -5138,33 +5263,53 @@ object-fit:contain;
     }
 
 
+    .qv-teacher-image-wrap{
+
+        min-height:165px;
+
+    }
+
+
     .qv-teacher-img{
 
-        width:135px;
+        width:145px;
 
-        max-height:210px;
+        max-height:190px;
 
     }
 
 
     .qv-teacher-bubble{
 
-        width:125px;
+        width:135px;
 
         min-height:58px;
 
-        font-size:11px;
-
         padding:9px 10px;
+
+        font-size:10px;
+
+    }
+
+
+    .qv-teacher-bubble::after{
+
+        width:17px;
+
+        height:17px;
+
+        bottom:-10px;
+
+        left:23px;
 
     }
 
 
     .qv-teacher-name{
 
-        font-size:12px;
-
         padding:5px 14px;
+
+        font-size:13px;
 
     }
 
@@ -5173,30 +5318,32 @@ object-fit:contain;
 
     .qv-question-panel{
 
+        width:98%;
+
         min-height:90px;
 
-        padding:11px 9px;
+        padding:10px 9px;
 
     }
 
 
     .qv-question-label{
 
-        font-size:12px;
+        font-size:13px;
 
     }
 
 
     .qv-prompt{
 
-        font-size:20px;
+        font-size:21px;
 
     }
 
 
     .qv-panel-decoration{
 
-        font-size:13px;
+        font-size:14px;
 
     }
 
@@ -5210,31 +5357,42 @@ object-fit:contain;
 
     /* FOOD */
 
+    .qv-food-options{
+
+        gap:10px;
+
+        margin-top:10px;
+
+    }
+
+
     .qv-food-card{
 
         width:96%;
 
-        padding:7px;
+        max-width:320px;
+
+        padding:6px;
 
     }
 
 
     .qv-food-image-wrap{
 
-        height:125px;
+        height:130px;
 
-        border-radius:14px;
+        border-radius:11px;
 
     }
 
 
     .qv-food-name{
 
+        min-height:40px;
+
         font-size:16px;
 
-        min-height:38px;
-
-        border-radius:15px;
+        border-radius:14px;
 
     }
 
@@ -5250,11 +5408,25 @@ object-fit:contain;
 
     .qv-tip-box{
 
+        width:97%;
+
+        padding:7px 8px;
+
         font-size:10px;
 
-        width:98%;
+    }
 
-        gap:6px;
+
+    .qv-tip-icon{
+
+        font-size:15px;
+
+    }
+
+
+    .qv-tip-star{
+
+        font-size:13px;
 
     }
 
@@ -5263,7 +5435,16 @@ object-fit:contain;
 
     .qv-practice-title{
 
-        font-size:19px;
+        font-size:20px;
+
+        margin-bottom:9px;
+
+    }
+
+
+    .qv-practice-card{
+
+        width:96%;
 
     }
 
@@ -5277,6 +5458,8 @@ object-fit:contain;
 
     .qv-practice-word{
 
+        min-height:58px;
+
         font-size:29px;
 
     }
@@ -5284,18 +5467,24 @@ object-fit:contain;
 
     .qv-practice-text{
 
-        font-size:13px;
+        font-size:12px;
 
     }
 
 
     .qv-mic-btn{
 
-        width:58px;
+        width:60px;
 
-        height:58px;
+        height:60px;
 
-        font-size:24px;
+        min-width:60px;
+
+        min-height:60px;
+
+        font-size:25px;
+
+        margin-bottom:10px;
 
     }
 
@@ -5304,23 +5493,16 @@ object-fit:contain;
 
     .qv-builder-section h2{
 
-        font-size:19px;
-
-    }
-
-
-    .qv-blank-word{
-
-        gap:5px;
+        font-size:20px;
 
     }
 
 
     .qv-blank-box{
 
-        width:36px;
+        width:38px;
 
-        height:36px;
+        height:38px;
 
         font-size:17px;
 
@@ -5329,16 +5511,16 @@ object-fit:contain;
 
     .qv-letter-container{
 
-        gap:6px;
+        gap:5px;
 
     }
 
 
     .qv-letter-btn{
 
-        width:40px;
+        width:41px;
 
-        height:40px;
+        height:41px;
 
         font-size:17px;
 
@@ -5347,7 +5529,7 @@ object-fit:contain;
 
     .qv-reset-btn{
 
-        padding:8px 18px;
+        padding:7px 17px;
 
         font-size:13px;
 
@@ -5358,17 +5540,521 @@ object-fit:contain;
 
     .qv-feedback{
 
-        bottom:6px;
+        font-size:12px;
 
-        max-width:90%;
+        padding:6px 11px;
 
-        padding:7px 12px;
+    }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width:360px){
+
+    .qv-main-card{
+
+        width:100%;
+
+        height:98dvh;
+
+        max-height:98dvh;
+
+        padding:7px 5px;
+
+        border-radius:19px;
+
+    }
+
+
+    /* HEADER */
+
+    .qv-back-btn,
+    .qv-skip-btn{
+
+        height:32px;
+
+        padding:5px 7px;
+
+        font-size:9px;
+
+    }
+
+
+    .qv-question-count{
+
+        font-size:11px;
+
+        padding:3px 6px;
+
+    }
+
+
+    .qv-progress-bar{
+
+        max-width:105px;
+
+        height:5px;
+
+    }
+
+
+    /* CONTENT */
+
+    .qv-content{
+
+        gap:7px;
+
+        padding-bottom:90px;
+
+    }
+
+
+    /* TEACHER */
+
+    .qv-teacher-section{
+
+        min-height:175px;
+
+    }
+
+
+    .qv-teacher-image-wrap{
+
+        min-height:145px;
+
+    }
+
+
+    .qv-teacher-img{
+
+        width:125px;
+
+        max-height:165px;
+
+    }
+
+
+    .qv-teacher-bubble{
+
+        width:118px;
+
+        min-height:52px;
+
+        padding:7px 8px;
+
+        font-size:9px;
+
+    }
+
+
+    .qv-teacher-bubble::after{
+
+        width:14px;
+
+        height:14px;
+
+        bottom:-8px;
+
+        left:19px;
+
+    }
+
+
+    .qv-teacher-name{
+
+        padding:4px 11px;
+
+        font-size:11px;
+
+    }
+
+
+    /* QUESTION */
+
+    .qv-question-panel{
+
+        min-height:82px;
+
+        padding:9px 7px;
+
+    }
+
+
+    .qv-question-label{
+
+        font-size:11px;
+
+    }
+
+
+    .qv-prompt{
+
+        font-size:18px;
+
+    }
+
+
+    .qv-panel-decoration{
+
+        font-size:12px;
+
+    }
+
+
+    .qv-panel-line{
+
+        font-size:9px;
+
+    }
+
+
+    /* FOOD */
+
+    .qv-food-card{
+
+        width:97%;
+
+        padding:5px;
+
+    }
+
+
+    .qv-food-image-wrap{
+
+        height:112px;
+
+        border-radius:9px;
+
+    }
+
+
+    .qv-food-name{
+
+        min-height:36px;
+
+        font-size:14px;
+
+        border-radius:12px;
+
+    }
+
+
+    .qv-food-name span{
+
+        font-size:10px;
+
+    }
+
+
+    /* TIP */
+
+    .qv-tip-box{
+
+        font-size:9px;
+
+        padding:6px;
+
+        gap:5px;
+
+    }
+
+
+    /* PRACTICE */
+
+    .qv-practice-title{
+
+        font-size:18px;
+
+    }
+
+
+    .qv-practice-image{
+
+        height:95px;
+
+    }
+
+
+    .qv-practice-word{
+
+        min-height:52px;
+
+        font-size:26px;
+
+    }
+
+
+    .qv-practice-text{
+
+        font-size:11px;
+
+    }
+
+
+    .qv-mic-btn{
+
+        width:55px;
+
+        height:55px;
+
+        min-width:55px;
+
+        min-height:55px;
+
+        font-size:22px;
+
+    }
+
+
+    /* WORD BUILDER */
+
+    .qv-builder-section h2{
+
+        font-size:18px;
+
+    }
+
+
+    .qv-blank-word{
+
+        gap:4px;
+
+    }
+
+
+    .qv-blank-box{
+
+        width:34px;
+
+        height:34px;
+
+        font-size:15px;
+
+    }
+
+
+    .qv-letter-container{
+
+        gap:4px;
+
+    }
+
+
+    .qv-letter-btn{
+
+        width:37px;
+
+        height:37px;
+
+        font-size:15px;
+
+    }
+
+
+    .qv-reset-btn{
+
+        padding:7px 15px;
+
+        font-size:12px;
+
+    }
+
+
+    /* FEEDBACK */
+
+    .qv-feedback{
+
+        font-size:11px;
+
+        padding:5px 9px;
+
+        bottom:5px;
+
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE LANDSCAPE
+===================================================== */
+
+@media (max-width:900px) and (orientation:landscape){
+
+    .qv-main-card{
+
+        height:94dvh;
+
+        max-height:94dvh;
+
+    }
+
+
+    .qv-content{
+
+        flex-direction:row;
+
+        align-items:center;
+
+        gap:12px;
+
+        padding-bottom:70px;
+
+    }
+
+
+    .qv-teacher-section{
+
+        width:32%;
+
+        min-height:0;
+
+        height:auto;
+
+    }
+
+
+    .qv-teacher-image-wrap{
+
+        min-height:0;
+
+    }
+
+
+    .qv-teacher-img{
+
+        width:120px;
+
+        max-height:150px;
+
+    }
+
+
+    .qv-teacher-bubble{
+
+        width:130px;
+
+        font-size:9px;
+
+    }
+
+
+    .qv-teacher-name{
+
+        font-size:11px;
+
+        padding:4px 10px;
+
+    }
+
+
+    .qv-activity{
+
+        width:68%;
+
+        max-height:none;
+
+    }
+
+
+    .qv-question-panel{
+
+        min-height:70px;
+
+        padding:7px;
+
+    }
+
+
+    .qv-question-label{
+
+        font-size:11px;
+
+    }
+
+
+    .qv-prompt{
+
+        font-size:18px;
+
+    }
+
+
+    .qv-food-options{
+
+        flex-direction:row;
+
+    }
+
+
+    .qv-food-card{
+
+        width:46%;
+
+    }
+
+
+    .qv-food-image-wrap{
+
+        height:85px;
+
+    }
+
+
+    .qv-food-name{
+
+        min-height:35px;
 
         font-size:13px;
 
     }
 
+
+    .qv-practice-card{
+
+        flex-direction:row;
+
+    }
+
+
+    .qv-practice-image{
+
+        width:90px;
+
+        height:70px;
+
+    }
+
+
+    .qv-practice-word{
+
+        min-width:100px;
+
+        font-size:24px;
+
+    }
+
+
+    .qv-mic-btn{
+
+        width:50px;
+
+        height:50px;
+
+        min-width:50px;
+
+        min-height:50px;
+
+        font-size:20px;
+
+    }
+
 }
+
 
 /* =========================================
    LISTEN & REPEAT INTRO
@@ -5950,6 +6636,7 @@ object-fit:contain;
 .lr-page {
     width: 100vw;
     height: 100vh;
+    min-height: 100dvh;
 
     display: flex;
     justify-content: center;
@@ -6835,7 +7522,8 @@ object-fit:contain;
 @media (max-width: 850px) {
 
     .lr-page {
-        height: 100vh;
+        height: 100dvh;
+        min-height: 100dvh;
 
         overflow: hidden;
     }
@@ -7565,6 +8253,7 @@ object-fit:contain;
 
     width: 100vw;
     height: 100vh;
+    min-height: 100dvh;
 
     position: relative;
 
@@ -8814,8 +9503,10 @@ background-repeat:no-repeat;
 .warmup-popup{
 
     width:1000px;
+    max-width:92vw;
 
     height:420px;
+    max-height:calc(100dvh - 40px);
 
     background:#D8B48A;
 
@@ -8910,6 +9601,7 @@ letter-spacing:3px;
     width:100%;
 
     height:100vh;
+    min-height:100dvh;
 
     display:flex;
 
@@ -9124,6 +9816,7 @@ letter-spacing:3px;
     width:100%;
 
     height:100vh;
+    min-height:100dvh;
 
     background:url("./assets/chatbg.jpeg") center/cover no-repeat;
 
@@ -9576,6 +10269,7 @@ letter-spacing:3px;
 
     width:100%;
     height:100vh;
+    min-height:100dvh;
 
     background:url("./assets/chatbg.jpeg") center center/cover no-repeat;
 
@@ -10331,6 +11025,7 @@ letter-spacing:3px;
     width:100%;
 
     height:100vh;
+    min-height:100dvh;
 
     position:relative;
 
@@ -10956,8 +11651,10 @@ letter-spacing:3px;
 .menu-intro-popup{
 
     width:1000px;
+    max-width:92vw;
 
     height:420px;
+    max-height:calc(100dvh - 40px);
 
     background:#D8B48A;
 
@@ -11086,6 +11783,7 @@ letter-spacing:3px;
     width:100%;
 
     height:100vh;
+    min-height:100dvh;
 
     background-size:cover;
 
@@ -11706,8 +12404,10 @@ transform:scale(1.04);
 .arrange-intro-popup{
 
     width:1000px;
+    max-width:92vw;
 
     height:420px;
+    max-height:calc(100dvh - 40px);
 
     background:#D8B48A;
 
@@ -11834,6 +12534,7 @@ transform:scale(1.04);
 
     width:100%;
     height:100vh;
+    min-height:100dvh;
 
     display:flex;
     justify-content:center;
@@ -12537,8 +13238,10 @@ background-repeat: no-repeat;
 .mood-popup{
 
     width:1000px;
+    max-width:92vw;
 
     height:480px;
+    max-height:calc(100dvh - 40px);
 
     background:#D8B48A;
 
@@ -12688,7 +13391,7 @@ background-repeat: no-repeat;
 
 .mood-page{
 
-    min-height:100vh;
+    min-height:100dvh;
 
     background-size:cover;
 
@@ -12731,8 +13434,10 @@ background-repeat: no-repeat;
 .mood-card{
 
     width:1350px;
+    max-width:92vw;
 
     height:860px;
+    max-height:calc(100dvh - 40px);
 
     background-image: url("./assets/ai-waiter-card.png");
 background-size: cover;
@@ -13559,8 +14264,10 @@ background-repeat: no-repeat;
 .quiz-popup{
 
     width:1000px;
+    max-width:92vw;
 
     height:480px;
+    max-height:calc(100dvh - 40px);
 
     background:#D8B48A;
 
@@ -13739,7 +14446,7 @@ PAGE
 
     width:100%;
 
-    min-height:100vh;
+    min-height:100dvh;
 
     background-size:cover;
 
@@ -13778,8 +14485,10 @@ MAIN CARD
 .quiz-card{
 
     width:1450px;
+    max-width:92vw;
 
     height:900px;
+    max-height:calc(100dvh - 40px);
 
     background-image: url("./assets/ai-waiter-card.png");
 background-size: cover;
@@ -14507,6 +15216,7 @@ RESPONSIVE
 .picture-container {
     width: 100%;
     height: 100vh;
+    min-height: 100dvh;
 
     background: url("./assets/chatbg.jpeg")
         center center / cover no-repeat;
@@ -15276,6 +15986,7 @@ RESPONSIVE
 
     width: 100%;
     height: 100vh;
+    min-height: 100dvh;
 
     background: url("./assets/chatbg.jpeg")
         center center / cover no-repeat;
@@ -16205,6 +16916,7 @@ RESPONSIVE
 
     width: 100%;
     height: 100vh;
+    min-height: 100dvh;
 
     background: url("./assets/chatbg.jpeg")
         center center / cover no-repeat;
@@ -17130,6 +17842,7 @@ RESPONSIVE
 .final-intro-container {
     width: 100%;
     height: 100vh;
+    min-height: 100dvh;
 
     background: url("./assets/chatbg.jpeg")
         center center / cover no-repeat;
@@ -17332,4 +18045,231 @@ RESPONSIVE
 
         padding: 10px 18px;
     }
+}
+
+
+/* =====================================================
+   GLOBAL MOBILE RESPONSIVENESS
+   Fixes for content being cut off on smaller screens
+===================================================== */
+
+@media (max-width: 768px) {
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  .app-main-wrapper {
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 480px) {
+
+  html {
+    font-size: 15px;
+  }
+
+  body,
+  #root {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-main-wrapper {
+    min-height: 100dvh;
+  }
+}
+
+
+/* =====================================================
+   SAFETY NET FOR MOBILE SCROLLING
+===================================================== */
+
+@supports (-webkit-touch-callout: none) {
+  html, body, #root {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* =====================================================
+   ADMIN PANEL
+===================================================== */
+
+.admin-page {
+  width: 100%;
+  min-height: 100dvh;
+  background: #f1f5f9;
+  font-family: 'Poppins', sans-serif;
+  padding: 30px 20px;
+  box-sizing: border-box;
+}
+
+.admin-content {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.admin-header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #2b1f14;
+  margin: 0;
+}
+
+.admin-logout {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.admin-logout:hover {
+  transform: scale(1.03);
+}
+
+.admin-subtitle {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 22px;
+}
+
+.admin-loading {
+  font-size: 16px;
+  color: #555;
+  text-align: center;
+  padding: 30px;
+}
+
+.admin-empty {
+  font-size: 16px;
+  color: #777;
+  text-align: center;
+  padding: 30px;
+}
+
+.admin-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead {
+  background: #503dab;
+}
+
+.admin-table th {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 16px;
+  text-align: left;
+  border: none;
+}
+
+.admin-table td {
+  color: #333;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background: #f9f7ff;
+}
+
+.btn-allow,
+.btn-block {
+  border: none;
+  border-radius: 30px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-allow {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-allow:hover {
+  background: #16a34a;
+}
+
+.btn-block {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-block:hover {
+  background: #dc2626;
+}
+
+/* --- Admin panel mobile --- */
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 20px 10px;
+  }
+
+  .admin-header h1 {
+    font-size: 28px;
+  }
+
+  .admin-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-table {
+    font-size: 12px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px 8px;
+  }
+
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
 }

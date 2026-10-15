@@ -94,8 +94,19 @@ function HobbyRankingActivity({
     const speechReceivedRef =
         useRef(false);
 
-    const handledResultRef =
-        useRef(false);
+     const handledResultRef =
+         useRef(false);
+
+    const dragStateRef =
+        useRef({
+            dragging: false,
+            startIndex: null,
+            currentIndex: null,
+            offsetY: 0,
+        });
+
+    const listRef =
+        useRef(null);
 
 
     /* =====================================================
@@ -172,9 +183,9 @@ function HobbyRankingActivity({
 
             }
 
-        };
+         };
 
-    }, []);
+     }, []);
 
 
     /* =====================================================
@@ -548,7 +559,233 @@ function HobbyRankingActivity({
 
 
     /* =====================================================
-                    DRAG START
+                    DRAG START (Pointer Events)
+    ===================================================== */
+
+    const handlePointerDown = (event, index) => {
+        if (
+            rankingDone ||
+            event.button !== 0 &&
+            event.pointerType !== "touch"
+        ) {
+            return;
+        }
+
+        if (event.pointerType !== "mouse") {
+            event.preventDefault();
+        }
+
+        const rect =
+            event.currentTarget
+                .getBoundingClientRect();
+
+        const startY =
+            event.clientY ||
+            (event.touches &&
+                event.touches[0] &&
+                event.touches[0].clientY) ||
+            0;
+
+        dragStateRef.current = {
+            dragging: true,
+            startIndex: index,
+            currentIndex: index,
+            offsetY:
+                startY -
+                rect.top,
+        };
+
+         setDraggedIndex(index);
+
+        if (listRef.current) {
+            listRef.current.style.cursor =
+                "grabbing";
+        }
+
+        document.addEventListener(
+            "pointermove",
+            handlePointerMove,
+            { passive: false }
+        );
+
+        document.addEventListener(
+            "pointerup",
+            handlePointerUp
+        );
+    };
+
+
+    /* =====================================================
+                    DRAG MOVE (Pointer Events)
+    ===================================================== */
+
+    const handlePointerMove = (event) => {
+        if (
+            !dragStateRef.current.dragging ||
+            rankingDone
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const mouseY =
+            event.clientY ||
+            (event.touches &&
+                event.touches[0] &&
+                event.touches[0].clientY) ||
+            0;
+
+        const listEl =
+            listRef.current;
+
+        if (!listEl) {
+            return;
+        }
+
+        const items =
+            listEl.querySelectorAll(
+                ".ranking-item"
+            );
+
+        if (!items.length) {
+            return;
+        }
+
+        let hoverIndex =
+            dragStateRef.current
+                .startIndex;
+
+        for (
+            let i = 0;
+            i < items.length;
+            i++
+        ) {
+            const item =
+                items[i];
+
+            const rect =
+                item.getBoundingClientRect();
+
+            const itemCenter =
+                rect.top +
+                rect.height / 2;
+
+            if (mouseY < itemCenter) {
+                hoverIndex = i;
+
+                break;
+            }
+
+            hoverIndex =
+                items.length - 1;
+        }
+
+        if (
+            hoverIndex !==
+            dragStateRef.current
+                .currentIndex
+        ) {
+
+            dragStateRef.current.currentIndex =
+                hoverIndex;
+
+            const updated =
+                [...hobbies];
+
+            const draggedItem =
+                updated[
+                    dragStateRef.current
+                        .startIndex
+                ];
+
+            updated.splice(
+                dragStateRef.current
+                    .startIndex,
+                1
+            );
+
+            updated.splice(
+                hoverIndex,
+                0,
+                draggedItem
+            );
+
+            setHobbies(updated);
+
+            setDraggedIndex(
+                hoverIndex
+            );
+
+        }
+    };
+
+
+    /* =====================================================
+                    POINTER UP (Drop)
+    ===================================================== */
+
+    const handlePointerUp = () => {
+        if (
+            !dragStateRef.current.dragging
+        ) {
+            return;
+        }
+
+        const startIndex =
+            dragStateRef.current.startIndex;
+
+        const currentIndex =
+            dragStateRef.current
+                .currentIndex;
+
+        const updated =
+            [...hobbies];
+
+        const draggedItem =
+            updated[startIndex];
+
+        updated.splice(
+            startIndex,
+            1
+        );
+
+        updated.splice(
+            currentIndex,
+            0,
+            draggedItem
+        );
+
+        setHobbies(updated);
+
+        dragStateRef.current = {
+            dragging: false,
+            startIndex: null,
+            currentIndex: null,
+            offsetY: 0,
+        };
+
+         setDraggedIndex(null);
+
+        if (listRef.current) {
+            listRef.current.style.cursor =
+                "";
+        }
+
+        document.removeEventListener(
+            "pointermove",
+            handlePointerMove
+        );
+
+        document.removeEventListener(
+            "pointerup",
+            handlePointerUp
+        );
+    };
+
+
+    /* =====================================================
+                    DRAG START (HTML5 fallback)
     ===================================================== */
 
     const handleDragStart = (index) => {
@@ -566,7 +803,7 @@ function HobbyRankingActivity({
 
 
     /* =====================================================
-                    DRAG OVER
+                    DRAG OVER (HTML5 fallback)
     ===================================================== */
 
     const handleDragOver = (event) => {
@@ -584,7 +821,7 @@ function HobbyRankingActivity({
 
 
     /* =====================================================
-                    DROP
+                    DROP (HTML5 fallback)
     ===================================================== */
 
     const handleDrop = (dropIndex) => {
@@ -1682,7 +1919,7 @@ function HobbyRankingActivity({
                             {hobbies.map(
                                 (hobby, index) => (
 
-                                    <div
+                                     <div
                                         key={hobby}
                                         draggable
                                         onDragStart={() =>
@@ -1698,7 +1935,20 @@ function HobbyRankingActivity({
                                                 index
                                             )
                                         }
-                                        className="ranking-item"
+                                        onPointerDown={(
+                                            event
+                                        ) =>
+                                            handlePointerDown(
+                                                event,
+                                                index
+                                            )
+                                        }
+                                        className={
+                                            draggedIndex ===
+                                            index
+                                                ? "ranking-item ranking-item-dragged"
+                                                : "ranking-item"
+                                        }
                                     >
 
                                         <div

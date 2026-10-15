@@ -432,3 +432,86 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .hobbies-teacher-intro-card {
+
+        width: 95%;
+
+        min-height: auto;
+
+        padding: 20px;
+
+    }
+
+
+    .hobbies-teacher-image {
+
+        width: 185px;
+
+        height: 185px;
+
+    }
+
+
+    .hobbies-teacher-speech-bubble {
+
+        min-height: 190px;
+
+        padding: 20px 24px;
+
+    }
+
+
+    .hobbies-teacher-name {
+
+        font-size: 17px;
+
+    }
+
+
+    .hobbies-teacher-speech-bubble p {
+
+        font-size: 16px;
+
+    }
+
+}
+
+
+@media (max-width: 320px) {
+
+    .hobbies-teacher-intro-card {
+
+        padding: 15px;
+
+    }
+
+
+    .hobbies-teacher-image {
+
+        width: 165px;
+
+        height: 165px;
+
+    }
+
+
+    .hobbies-teacher-speech-bubble {
+
+        min-height: 170px;
+
+        padding: 16px 20px;
+
+    }
+
+
+    .hobbies-teacher-speech-bubble p {
+
+        font-size: 14px;
+
+    }
+
+}

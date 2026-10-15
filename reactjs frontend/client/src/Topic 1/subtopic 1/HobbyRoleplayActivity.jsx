@@ -106,6 +106,12 @@ function HobbyRoleplayActivity({
     const [showExample, setShowExample] =
         useState(false);
 
+    const [conversationHistory, setConversationHistory] =
+        useState([]);
+
+    const [userName] =
+        useState("Student");
+
 
     /* =====================================================
                             REFS
@@ -876,7 +882,13 @@ function HobbyRoleplayActivity({
                                 currentScene.expectedExample,
 
                             activity:
-                                "hobby-roleplay"
+                                "hobby-roleplay",
+
+                            history:
+                                conversationHistory,
+
+                            userName:
+                                userName
 
                         })
 
@@ -926,6 +938,23 @@ function HobbyRoleplayActivity({
                     "correct"
                 );
 
+                setConversationHistory(
+                    (previous) =>
+                        [
+                            ...previous,
+                            {
+                                role: "user",
+                                content:
+                                    answer.trim()
+                            },
+                            {
+                                role: "assistant",
+                                content:
+                                    teacherResponse
+                            }
+                        ]
+                );
+
 
                 await speak(
                     teacherResponse
@@ -952,6 +981,23 @@ function HobbyRoleplayActivity({
                 "retry"
             );
 
+            setConversationHistory(
+                (previous) =>
+                    [
+                        ...previous,
+                        {
+                            role: "user",
+                            content:
+                                answer.trim()
+                        },
+                        {
+                            role: "assistant",
+                            content:
+                                teacherResponse
+                        }
+                    ]
+            );
+
 
             await speak(
                 teacherResponse
@@ -975,7 +1021,6 @@ function HobbyRoleplayActivity({
             setAnswerStatus(
                 "error"
             );
-
 
             await speak(
                 "Sorry, I could not check your answer right now. Please try again."
@@ -1102,6 +1147,8 @@ function HobbyRoleplayActivity({
 
         setShowExample(false);
 
+        setConversationHistory([]);
+
 
         setRound(
             nextRound
@@ -1164,6 +1211,8 @@ function HobbyRoleplayActivity({
 
         setShowExample(false);
 
+        setConversationHistory([]);
+
 
         if (onNext) {
 
@@ -1190,6 +1239,8 @@ function HobbyRoleplayActivity({
         setAnswerStatus("");
 
         setShowExample(false);
+
+        setConversationHistory([]);
 
 
         if (onBack) {

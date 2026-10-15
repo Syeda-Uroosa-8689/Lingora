@@ -173,3 +173,30 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .hobby-ranking-popup {
+
+        width: 95%;
+
+        height: 230px;
+
+    }
+
+
+    .hobby-ranking-intro-icon {
+
+        font-size: 38px;
+
+    }
+
+
+    .hobby-ranking-popup h1 {
+
+        font-size: 28px;
+
+    }
+
+}

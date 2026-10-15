@@ -1271,6 +1271,15 @@
 
         max-height: none;
 
+        overflow: visible;
+
+    }
+
+
+    .personality-potion-activity-page {
+
+        overflow-y: auto;
+
     }
 
 
@@ -1360,6 +1369,8 @@
 
         padding: 10px;
 
+        overflow-y: auto;
+
     }
 
 
@@ -1367,10 +1378,16 @@
 
         width: 96vw;
 
+        height: auto;
+
+        max-height: none;
+
         padding:
             16px;
 
         border-radius: 20px;
+
+        overflow: visible;
 
     }
 

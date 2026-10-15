@@ -1013,16 +1013,16 @@
 
   display: flex;
 
-  align-items: center;
+  flex-direction: column;
 
   gap: 14px;
 
-  background: #edfff0;
+  background: #fff7ed;
 
   border:
-    2px solid #57af69;
+    2px solid #f59e1e;
 
-  color: #236f35;
+  color: #78350f;
 
   animation:
     fp3FeedbackAppear 0.35s ease;
@@ -1044,6 +1044,38 @@
   }
 }
 
+.fp3-success-box.correct {
+  background: #edfff0;
+
+  border-color: #57af69;
+
+  color: #236f35;
+}
+
+.fp3-success-box.correct .fp3-success-icon {
+  background: #49a862;
+}
+
+.fp3-success-box.incorrect {
+  background: #fff5f5;
+
+  border-color: #ef4444;
+
+  color: #78350f;
+}
+
+.fp3-success-box.incorrect .fp3-success-icon {
+  background: #ef4444;
+}
+
+.fp3-success-row {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+}
+
 .fp3-success-icon {
   width: 44px;
   height: 44px;
@@ -1052,7 +1084,7 @@
 
   border-radius: 50%;
 
-  background: #49a862;
+  background: #f59e1e;
 
   color: white;
 
@@ -1075,18 +1107,6 @@
   margin: 4px 0 0;
 
   line-height: 1.4;
-}
-
-.fp3-success-box small {
-  display: block;
-
-  margin-top: 7px;
-
-  color: #8a6da8;
-
-  font-size: 13px;
-
-  font-weight: 600;
 }
 
 /* =====================================================
@@ -1124,6 +1144,48 @@
 }
 
 .fp3-try-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 18px
+    rgba(0, 0, 0, 0.16);
+}
+
+/* =====================================================
+      CONTINUE BUTTON
+===================================================== */
+
+.fp3-continue-button {
+  display: block;
+
+  margin: 18px auto 0;
+
+  padding: 10px 23px;
+
+  border: none;
+
+  border-radius: 24px;
+
+  background: #7650a8;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px
+    rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fp3-continue-button:hover {
   transform: translateY(-2px);
 
   box-shadow:
@@ -1213,23 +1275,16 @@
 
   .fp3-header {
     grid-template-columns:
-      1fr
-      1fr;
+      auto minmax(0, 1fr) auto;
 
-    gap: 10px;
+    gap: 8px;
   }
 
   .fp3-title-area {
-    grid-column: 1 / -1;
-
-    grid-row: 1;
+    text-align: center;
   }
 
   .fp3-back-button {
-    grid-column: 1;
-
-    grid-row: 2;
-
     justify-self: start;
 
     min-width: 105px;
@@ -1240,10 +1295,6 @@
   }
 
   .fp3-skip-button {
-    grid-column: 2;
-
-    grid-row: 2;
-
     justify-self: end;
 
     min-width: 105px;
@@ -1422,6 +1473,81 @@
 
   .fp3-question-heading h2 {
     font-size: 19px;
+  }
+
+}
+
+
+@media (max-width: 320px) {
+
+  .fp3-title-area h1 {
+    font-size: 24px;
+  }
+
+  .fp3-title-strip {
+    font-size: 11px;
+
+    padding: 5px 12px;
+  }
+
+  .fp3-back-button,
+  .fp3-skip-button {
+
+    padding: 8px 10px;
+
+    font-size: 12px;
+
+    min-width: 95px;
+  }
+
+  .fp3-game-intro h2 {
+    font-size: 21px;
+  }
+
+  .fp3-memory-card {
+    min-height: 125px;
+  }
+
+  .fp3-card-icon {
+    font-size: 33px;
+  }
+
+  .fp3-memory-card span {
+    font-size: 11px;
+  }
+
+  .fp3-teacher-bubble {
+    padding: 10px 12px;
+  }
+
+  .fp3-teacher-bubble strong {
+    font-size: 16px;
+  }
+
+  .fp3-teacher-bubble p {
+    font-size: 11px;
+  }
+
+  .fp3-question-heading h2 {
+    font-size: 18px;
+  }
+
+  .fp3-speaker-button {
+    width: 37px;
+    height: 37px;
+
+    font-size: 15px;
+  }
+
+  .fp3-speaking-title {
+    font-size: 16px;
+  }
+
+  .fp3-mic-button {
+    width: 75px;
+    height: 75px;
+
+    font-size: 30px;
   }
 
 }

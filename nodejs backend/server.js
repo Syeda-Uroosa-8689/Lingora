@@ -4,10 +4,27 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Groq = require("groq-sdk");
+const crypto = require("crypto");
+
+const User =
+    require("./models/User");
+
+const School =
+    require("./models/School");
+
+const Progress =
+    require("./models/Progress");
+
+const Result =
+    require("./models/Result");
+
+const Pathway =
+    require("./models/Pathway");
+
+const Class =
+    require("./models/Class");
 
 const app = express();
-
-
 
 app.use(cors());
 
@@ -17,8 +34,10 @@ app.use(express.json());
    MONGODB CONNECTION
 ========================================================= */
 
+let mongooseConnectPromise = null;
+
 if (process.env.MONGODB_URI) {
-  mongoose
+  mongooseConnectPromise = mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
       console.log("=================================");
@@ -5078,8 +5097,15 @@ app.post(
         message,
         context,
         userName,
+        partner,
+        relation,
         selectedPartner
       } = req.body;
+
+       const selectedPartnerName =
+        partner ||
+        relation ||
+        selectedPartner;
 
 
       /* ---------------------------------------------
@@ -5138,8 +5164,8 @@ app.post(
       --------------------------------------------- */
 
       if (
-        !selectedPartner ||
-        !String(selectedPartner).trim()
+        !selectedPartnerName ||
+        !String(selectedPartnerName).trim()
       ) {
 
         return res.status(400).json({
@@ -5169,9 +5195,9 @@ CURRENT QUESTION:
 ${question}
 
 
-SELECTED PERSON:
+ SELECTED PERSON:
 
-${selectedPartner}
+ ${selectedPartnerName}
 
 
 STUDENT SPOKEN ANSWER:
@@ -5787,7 +5813,7 @@ IMPORTANT:
 ========================================================= */
 
 app.post(
-    "/api/hobby-roleplay",
+    "/api/hobby-roleplay/check",
     async (req, res) => {
 
         try {
@@ -5798,8 +5824,27 @@ app.post(
                 question,
                 message,
                 history,
-                userName
+                userName,
+                round,
+                scene,
+                activity
             } = req.body;
+
+
+            /* =================================================
+                FIELD MAPPING
+                Frontend sends: { message, question, round, scene, expectedExample, activity }
+                Backend uses:   { sceneNumber, sceneTitle, question, message, history, userName }
+            ================================================= */
+
+            const resolvedSceneNumber =
+                sceneNumber ?? round;
+
+            const resolvedSceneTitle =
+                sceneTitle ?? scene ?? "Hobby Roleplay";
+
+            const resolvedUserName =
+                userName || "Student";
 
 
             /* =================================================
@@ -5807,9 +5852,9 @@ app.post(
             ================================================= */
 
             if (
-                !sceneNumber ||
+                !resolvedSceneNumber ||
                 ![1, 2, 3].includes(
-                    Number(sceneNumber)
+                    Number(resolvedSceneNumber)
                 )
             ) {
 
@@ -5922,11 +5967,11 @@ app.post(
 
 CURRENT SCENE:
 
-Scene ${sceneNumber}
+Scene ${resolvedSceneNumber}
 
 SCENE TITLE:
 
-${sceneTitle || "Hobby Roleplay"}
+${resolvedSceneTitle}
 
 CURRENT TEACHER QUESTION:
 
@@ -5938,7 +5983,7 @@ ${message}
 
 STUDENT NAME:
 
-${userName || "Student"}
+${resolvedUserName}
 
 PREVIOUS CONVERSATION:
 
@@ -8835,11 +8880,7 @@ RESPONSE FORMAT
 
                     temperature: 0.3,
 
-                    max_tokens: 250,
-
-                    response_format: {
-                        type: "json_object"
-                    }
+                    max_tokens: 250
 
                 });
 
@@ -8853,13 +8894,37 @@ RESPONSE FORMAT
                     ?.message?.content;
 
 
+            /* =========================================
+               REMOVE MARKDOWN JSON FENCES
+               (matches Activity 1 pattern)
+            ========================================= */
+
+            let aiReply = aiResponse
+                ?.replace(
+                    /^```json\s*/i,
+                    ""
+                )
+
+                .replace(
+                    /^```\s*/i,
+                    ""
+                )
+
+                .replace(
+                    /\s*```$/i,
+                    ""
+                )
+
+                .trim();
+
+
             let result;
 
 
             try {
 
                 result =
-                    JSON.parse(aiResponse);
+                    JSON.parse(aiReply);
 
             }
 
@@ -9355,9 +9420,112 @@ app.post(
           answers:
             answerData,
 
-          grammar_mistakes:
+           grammar_mistakes:
             grammarMistakes,
         });
+
+      /* ---------------------------------------------
+          ALSO SAVE TO Result (admin dashboard)
+       --------------------------------------------- */
+
+      const userDoc =
+        await User.findOne({
+          fullName: {
+            $regex: new RegExp(
+              "^" +
+              userName +
+              "$",
+              "i"
+            ),
+          },
+        });
+
+      const challengeType =
+        topicId === 1
+          ? "Final Challenge 1"
+          : topicId === 2
+          ? "Final Challenge 2"
+          : topicId === 4
+          ? "Final Challenge 4"
+          : "Final Challenge";
+
+      const passed =
+        percentage >= 60;
+
+      await Result.create({
+        user: userDoc
+          ? userDoc._id
+          : null,
+        userName:
+          userName || "Student",
+        school: userDoc
+          ? userDoc.schoolId
+          : null,
+        challengeType,
+        score: obtainedMarks,
+        maxScore:
+          calculatedTotalMarks,
+        passed,
+        answers: answerData,
+      });
+
+      /* ---------------------------------------------
+          ALSO RECORD PROGRESS
+       --------------------------------------------- */
+
+      if (userDoc) {
+        const pathwayName =
+          topicId === 1
+            ? "Pathway 1"
+            : topicId === 2
+            ? "Pathway 2"
+            : topicId === 4
+            ? "Pathway 4"
+            : "Pathway";
+
+        const topicName =
+          topicId === 1
+            ? "Topic 1"
+            : topicId === 2
+            ? "Topic 2"
+            : topicId === 4
+            ? "Topic 4"
+            : "Topic";
+
+        await Progress.updateOne(
+          {
+            user: userDoc._id,
+            pathway: pathwayName,
+            topic: topicName,
+            subtopic:
+              "Final Challenge",
+            lesson:
+              challengeType,
+          },
+          {
+            $setOnInsert: {
+              school:
+                userDoc.schoolId ||
+                null,
+            },
+            $set: {
+              activity:
+                "final_challenge",
+              status: passed
+                ? "completed"
+                : "in_progress",
+              score: obtainedMarks,
+              maxScore:
+                calculatedTotalMarks,
+              completedAt:
+                new Date(),
+            },
+          },
+          {
+            upsert: true,
+          }
+        );
+      }
 
       console.log(
         "================================="
@@ -10616,13 +10784,90 @@ app.post(
           answers:
             answerData,
 
-          grammar_mistakes:
+           grammar_mistakes:
             grammarMistakes,
         });
 
       /* ---------------------------------------------
-         SERVER LOG
-      --------------------------------------------- */
+          ALSO SAVE TO Result (admin dashboard)
+       --------------------------------------------- */
+
+      const userDoc =
+        await User.findOne({
+          fullName: {
+            $regex: new RegExp(
+              "^" +
+              userName +
+              "$",
+              "i"
+            ),
+          },
+        });
+
+      const challengeType =
+        Number(topicId) === 1
+          ? "Final Challenge 1"
+          : Number(topicId) === 2
+          ? "Final Challenge 2"
+          : "Final Challenge";
+
+      const passed =
+        percentage >= 60;
+
+      await Result.create({
+        user: userDoc
+          ? userDoc._id
+          : null,
+        userName:
+          userName || "Student",
+        school: userDoc
+          ? userDoc.schoolId
+          : null,
+        challengeType,
+        score: obtainedMarks,
+        maxScore:
+          calculatedTotalMarks,
+        passed,
+        answers: answerData,
+      });
+
+      if (userDoc) {
+        await Progress.updateOne(
+          {
+            user: userDoc._id,
+            pathway: "Pathway 1",
+            topic: "Topic 1",
+            subtopic:
+              "Final Challenge",
+            lesson:
+              challengeType,
+          },
+          {
+            $setOnInsert: {
+              school:
+                userDoc.schoolId ||
+                null,
+            },
+            $set: {
+              activity:
+                "final_challenge",
+              status: passed
+                ? "completed"
+                : "in_progress",
+              score: obtainedMarks,
+              maxScore:
+                calculatedTotalMarks,
+              completedAt:
+                new Date(),
+            },
+          },
+          { upsert: true }
+        );
+      }
+
+      /* ---------------------------------------------
+          SERVER LOG
+       --------------------------------------------- */
 
       console.log(
         "================================="
@@ -11923,15 +12168,88 @@ app.post(
           answers:
             answerData,
 
-          grammar_mistakes:
+           grammar_mistakes:
             grammarMistakes,
 
         });
 
+      /* ---------------------------------------------
+          ALSO SAVE TO Result (admin dashboard)
+       --------------------------------------------- */
+
+      const userDoc =
+        await User.findOne({
+          fullName: {
+            $regex: new RegExp(
+              "^" +
+              userName +
+              "$",
+              "i"
+            ),
+          },
+        });
+
+      const challengeType =
+        "Final Challenge 4";
+
+      const passed =
+        percentage >= 60;
+
+      await Result.create({
+        user: userDoc
+          ? userDoc._id
+          : null,
+        userName:
+          userName || "Student",
+        school: userDoc
+          ? userDoc.schoolId
+          : null,
+        challengeType,
+        score: obtainedMarks,
+        maxScore:
+          calculatedTotalMarks,
+        passed,
+        answers: answerData,
+      });
+
+      if (userDoc) {
+        await Progress.updateOne(
+          {
+            user: userDoc._id,
+            pathway: "Pathway 4",
+            topic: "Topic 4",
+            subtopic:
+              "Final Challenge",
+            lesson:
+              challengeType,
+          },
+          {
+            $setOnInsert: {
+              school:
+                userDoc.schoolId ||
+                null,
+            },
+            $set: {
+              activity:
+                "final_challenge",
+              status: passed
+                ? "completed"
+                : "in_progress",
+              score: obtainedMarks,
+              maxScore:
+                calculatedTotalMarks,
+              completedAt:
+                new Date(),
+            },
+          },
+          { upsert: true }
+        );
+      }
+
 
       /* ---------------------------------------------
-         SERVER LOG
-      --------------------------------------------- */
+          SERVER LOG
+       --------------------------------------------- */
 
       console.log(
         "========================================="
@@ -12189,13 +12507,3510 @@ app.get(
 );
 
 
+/* =========================================================
+   AUTH: PASSWORD HASHING
+   Uses Node.js built-in crypto (no extra deps).
+   Stored format: "salt:hash"
+========================================================= */
+
+function hashPassword(
+  password
+) {
+  const salt =
+    crypto
+      .randomBytes(16)
+      .toString("hex");
+
+  const hash =
+    crypto
+      .scryptSync(
+        password,
+        salt,
+        64
+      )
+      .toString("hex");
+
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(
+  password,
+  stored
+) {
+  if (
+    !stored ||
+    typeof stored !== "string" ||
+    !stored.includes(":")
+  ) {
+    return false;
+  }
+
+  const [salt, hash] =
+    stored.split(":");
+
+  const testHash =
+    crypto
+      .scryptSync(
+        password,
+        salt,
+        64
+      )
+      .toString("hex");
+
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(hash, "hex"),
+      Buffer.from(testHash, "hex")
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+
+/* =========================================================
+   ADMIN AUTH
+   Token-based gate using in-memory token Maps.
+   Admin tokens are issued at /api/login for User accounts
+   with role="admin". Each admin is linked to a School; if
+   that School is globally inactive, the admin is locked out.
+ ========================================================= */
+
+const TEACHER_EMAIL =
+    process.env.TEACHER_EMAIL ||
+    "teacher@fluento.com";
+
+const TEACHER_PASSWORD =
+    process.env.TEACHER_PASSWORD ||
+    "Teacher@123";
+
+const SUPER_ADMIN_EMAIL =
+    process.env.SUPER_ADMIN_EMAIL ||
+    "superadmin@fluento.com";
+
+const SUPER_ADMIN_PASSWORD =
+    process.env.SUPER_ADMIN_PASSWORD ||
+    "SuperAdmin@123";
+
+const adminTokens =
+  new Map();
+
+async function isAdminAuthed(
+  req
+) {
+  const authHeader =
+    req.headers.authorization ||
+    "";
+
+  const token =
+    authHeader.replace(
+      /^Bearer\s+/i,
+      ""
+    );
+
+  if (
+    !!token &&
+    adminTokens.has(token)
+  ) {
+    req.user_id =
+      adminTokens.get(token);
+
+    /* School-level global status check */
+    const _admin =
+      await User.findById(
+        req.user_id
+      ).select("schoolId");
+
+    if (
+      _admin &&
+      _admin.schoolId &&
+      (await isSchoolInactive(
+        _admin.schoolId
+      ))
+    ) {
+      return false;
+    }
+
+    req.school_id =
+      _admin && _admin.schoolId
+        ? _admin.schoolId.toString()
+        : null;
+
+    return true;
+  }
+
+  return false;
+}
+
+const superAdminTokens = new Set();
+
+function isSuperAdminAuthed(
+  req
+) {
+  const authHeader =
+    req.headers.authorization ||
+    "";
+
+  const token =
+    authHeader.replace(
+      /^Bearer\s+/i,
+      ""
+    );
+
+  return (
+    !!token &&
+    superAdminTokens.has(token)
+  );
+}
+
+function requireSuperAdmin(
+  req,
+  res,
+  next
+) {
+  if (
+    !isSuperAdminAuthed(req)
+  ) {
+    return res
+      .status(401)
+      .json({
+        message:
+          "Unauthorized — super admin token required"
+      });
+  }
+
+  next();
+}
+
+
+/* =========================================================
+   TEACHER AUTH
+   Token-based gates using in-memory token Maps.
+   Tokens are issued only after MongoDB credential
+   verification (see /api/teacher/login). Each token maps to a
+   MongoDB user ID.
+ ========================================================= */
+
+const teacherTokens = new Map();
+
+async function isTeacherAuthed(req) {
+  const authHeader =
+    req.headers.authorization ||
+    "";
+
+  const token =
+    authHeader.replace(
+      /^Bearer\s+/i,
+      ""
+    );
+
+  if (
+    !!token &&
+    teacherTokens.has(token)
+  ) {
+    req.user_id =
+      teacherTokens.get(token);
+
+    /* School-level global status check */
+    const _teacher =
+      await User.findById(
+        req.user_id
+      ).select("schoolId");
+
+    if (
+      _teacher &&
+      _teacher.schoolId &&
+      (await isSchoolInactive(
+        _teacher.schoolId
+      ))
+    ) {
+      return false;
+    }
+
+    req.school_id =
+      _teacher && _teacher.schoolId
+        ? _teacher.schoolId.toString()
+        : null;
+
+    return true;
+  }
+
+  return false;
+}
+
+/* =========================================================
+    SCHOOL-LEVEL INACTIVE CHECK
+   When a School's globalStatus is "inactive", all accounts
+   (Admin, Teacher, Student) belonging to that school
+   must be blocked from accessing protected APIs.
+   Only Super Admin can reactivate the school.
+========================================================= */
+
+async function isSchoolInactive(schoolId) {
+  if (!schoolId) return false;
+  try {
+    const school =
+      await School.findOne({
+        schoolId: schoolId
+      });
+    return (
+      school &&
+      school.globalStatus === "inactive"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function schoolInactiveResponse(res) {
+  return res.status(403).json({
+    success: false,
+    message:
+      "This school is currently inactive.",
+  });
+}
+
+
+/* =========================================================
+    PUBLIC SCHOOL LIST
+    Returns all school names so the Student Sign Up form
+    can display them in a dropdown. No auth required.
+  ========================================================= */
+
+app.get(
+  "/api/schools",
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const schools =
+        await School.find(
+          {},
+          {
+            name: 1,
+            schoolId: 1,
+            _id: 0,
+          }
+        ).sort({ name: 1 });
+
+      return res.json({
+        success: true,
+        schools,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Public school list error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch schools.",
+      });
+    }
+  }
+);
+
+/* ---------- CLASS LIST (for sign-up / teacher forms) ---------- */
+
+app.get(
+  "/api/classes",
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const { schoolId } = req.query;
+
+      const filter = {};
+      if (schoolId) {
+        filter.$or = [
+          { schoolId: null },
+          { schoolId: schoolId },
+        ];
+      }
+
+      const classes =
+        await Class
+          .find(filter, {
+            name: 1,
+            _id: 1,
+            schoolId: 1,
+          })
+          .sort({ name: 1 });
+
+      return res.json({
+        success: true,
+        classes: classes.map(
+          (c) => ({
+            _id: c._id,
+            name: c.name,
+            schoolId: c.schoolId,
+          })
+        ),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Class list error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch classes.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+    SIGN UP (REGISTER)
+    New users are Blocked by default.
+  ========================================================= */
+
+app.post(
+  "/api/register",
+  async (req, res) => {
+    try {
+      const {
+        fullName,
+        email,
+        mobile,
+        password,
+        confirmPassword,
+        schoolName,
+        class: studentClass,
+      } = req.body;
+
+
+      /* ---------------------------------
+         VALIDATION
+      --------------------------------- */
+
+      if (
+        !fullName ||
+        !email ||
+        !password
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Full Name, Email and Password are required.",
+        });
+      }
+
+      if (
+        password !==
+        confirmPassword
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Passwords do not match.",
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be at least 6 characters.",
+        });
+      }
+
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+
+      /* ---------------------------------
+          DUPLICATE EMAIL CHECK
+       --------------------------------- */
+
+      const existing =
+        await User.findOne({
+          email,
+        });
+
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Email already registered.",
+        });
+      }
+
+
+      /* ---------------------------------
+          RESOLVE SCHOOL SELECTED BY STUDENT
+          The student picks a School Name
+          from the dropdown; we look up that
+          school's custom schoolId.
+       --------------------------------- */
+
+      let schoolId = null;
+      if (schoolName) {
+        const school =
+          await School.findOne({
+            name: schoolName,
+          }).select("schoolId");
+        if (school) {
+          schoolId = school.schoolId;
+        }
+      }
+
+      const hashed =
+        hashPassword(password);
+
+      const user =
+        await User.create({
+          username: email,
+          fullName,
+          email,
+          mobile:
+            mobile || "",
+          password: hashed,
+          isBlocked: true,
+          isApproved: false,
+          role: "student",
+          schoolId,
+          class: studentClass || "",
+        });
+
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "Registration successful. Awaiting admin approval.",
+        user: {
+          _id: user._id,
+          fullName:
+            user.fullName,
+          email: user.email,
+          mobile: user.mobile,
+          isBlocked:
+            user.isBlocked,
+          isApproved:
+            user.isApproved,
+          role: user.role,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Register Error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          err.message ||
+          "Registration failed.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   LOGIN
+   Only approved, non-blocked users may log in.
+========================================================= */
+
+app.post(
+  "/api/login",
+  async (req, res) => {
+    try {
+      const {
+        email,
+        password
+      } = req.body;
+
+
+      /* ---------------------------------
+          VALIDATION
+       --------------------------------- */
+
+      if (
+        !email ||
+        !password
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Email and Password are required.",
+        });
+      }
+
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+
+      /* ---------------------------------
+           SUPER ADMIN FALLBACK: env creds
+           Super Admin has no school, so
+           schoolId is not required.
+      --------------------------------- */
+
+      if (
+        email === SUPER_ADMIN_EMAIL &&
+        password === SUPER_ADMIN_PASSWORD
+      ) {
+        const token =
+          crypto
+            .randomBytes(32)
+            .toString("hex");
+
+        superAdminTokens.add(token);
+
+        return res.json({
+          success: true,
+          token,
+          message:
+            "Login successful.",
+          user: {
+            _id: "superadmin",
+            fullName: "Super Admin",
+            email,
+            role:
+              "superadmin",
+            isApproved: true,
+            isBlocked: false,
+          },
+        });
+      }
+
+
+      /* ---------------------------------
+           FIND USER IN users COLLECTION
+           All roles (admin, teacher,
+           student) are stored in the
+           User collection. The user's
+           schoolId is stored on the
+           document and returned in the
+           response so the client can load
+           the correct school's data.
+       --------------------------------- */
+
+      let account =
+        await User.findOne({
+          email,
+        }).catch(() => null);
+
+      if (!account) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password.",
+        });
+      }
+
+      /* Determine role */
+      const role = account.role;
+
+      /* Verify password */
+      if (
+        !verifyPassword(
+          password,
+          account.password
+        )
+      ) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid email or password.",
+        });
+      }
+
+      /* School-level global status check —
+         MUST run BEFORE account-level
+         isApproved, isBlocked, or account
+         globalStatus checks. If the school
+         has been globally deactivated by
+         Super Admin, reject login entirely. */
+      if (account.schoolId) {
+        const schoolDoc =
+          await School.findOne({
+            schoolId: account.schoolId
+          });
+        if (
+          schoolDoc &&
+          schoolDoc.globalStatus ===
+            "inactive"
+        ) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "This school is currently inactive.",
+          });
+        }
+      }
+
+      /* Global status check — only
+         Super Admin can reactivate
+         a globally inactive account */
+      if (
+        account.globalStatus ===
+        "inactive"
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Your account has been globally deactivated. Please contact Super Admin.",
+        });
+      }
+
+      /* Approval / block check */
+      if (
+        account.isBlocked ||
+        !account.isApproved
+      ) {
+        return res.status(403).json({
+          success: false,
+          awaitingApproval: true,
+          message:
+            "Your account is waiting for admin approval.",
+          user: {
+            email:
+              account.email,
+            fullName:
+              account.fullName,
+            role,
+          },
+        });
+      }
+
+      /* Success - generate token for
+         admin/teacher roles */
+      let token = null;
+
+      if (role === "teacher") {
+        token = crypto
+          .randomBytes(32)
+          .toString("hex");
+        teacherTokens.set(
+          token,
+          account._id
+            .toString()
+        );
+      }
+
+      if (role === "admin") {
+        token = crypto
+          .randomBytes(32)
+          .toString("hex");
+        adminTokens.set(
+          token,
+          account._id
+            .toString()
+        );
+      }
+
+      const response = {
+        success: true,
+        message:
+          "Login successful.",
+        user: {
+          _id: account._id,
+          fullName:
+            account.fullName,
+          email:
+            account.email,
+          mobile:
+            account.mobile,
+          role,
+          isApproved:
+            account.isApproved,
+          isBlocked:
+            account.isBlocked,
+           schoolId:
+             account.schoolId
+               ? account.schoolId
+                   .toString()
+               : null,
+        },
+      };
+
+      if (token) {
+        response.token = token;
+      }
+
+      return res.json(response);
+    } catch (err) {
+      console.log(
+        "❌ Login Error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Login failed.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   ADMIN DASHBOARD ROUTES
+    Schools, teachers, students (role=student),
+   pathways/topics content, student progress & results.
+   All protected by isAdminAuthed (existing admin token set).
+========================================================= */
+
+/* ---------- SUMMARY (dashboard cards) ---------- */
+
+app.get(
+  "/api/admin/summary",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const schoolId =
+        req.school_id;
+
+      const [
+        students,
+        teachers,
+        teachersPending,
+        results,
+      ] = await Promise.all([
+        schoolId
+          ? User.countDocuments({
+              role: "student",
+              schoolId: schoolId,
+            })
+          : User.countDocuments({
+              role: "student",
+            }),
+        schoolId
+          ? User.countDocuments({
+              role: "teacher",
+              schoolId: schoolId,
+            })
+          : User.countDocuments({
+              role: "teacher",
+            }),
+        schoolId
+          ? User.countDocuments({
+              role: "student",
+              schoolId: schoolId,
+              isApproved: false,
+            })
+          : User.countDocuments({
+              role: "student",
+              isApproved: false,
+            }),
+        Result.countDocuments({}),
+      ]);
+
+      return res.json({
+        success: true,
+        summary: {
+          students,
+          teachers,
+          pendingRequests:
+            teachersPending,
+          results,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin summary error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to load summary.",
+      });
+    }
+  }
+);
+
+
+/* ---------- STUDENTS (role = user) ---------- */
+
+app.get(
+  "/api/admin/students",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const students =
+        await User.aggregate([
+          {
+            $match: {
+              role: "student",
+              ...(req.school_id
+                ? { schoolId: req.school_id }
+                : {}),
+            },
+          },
+          {
+            $lookup: {
+              from: "schools",
+              localField: "schoolId",
+              foreignField: "schoolId",
+              as: "school",
+            },
+          },
+          {
+            $unwind: {
+              path: "$school",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ]);
+
+      return res.json({
+        success: true,
+        students: students.map((s) => ({
+          _id: s._id,
+          fullName: s.fullName,
+          email: s.email,
+          mobile: s.mobile,
+          school: s.school
+            ? {
+                _id: s.school._id,
+                name: s.school.name,
+              }
+            : null,
+          class: s.class,
+          role: s.role,
+          isBlocked: s.isBlocked,
+          isApproved: s.isApproved,
+          createdAt: s.createdAt,
+        })),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list students error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch students.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/admin/students/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        fullName,
+        email,
+        mobile,
+      } = req.body;
+
+      const user =
+        await User.findById(req.params.id);
+
+      if (!user || user.role !== "student") {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found.",
+        });
+      }
+
+      /* School scope check — admin can only manage their own school */
+      if (
+        req.school_id &&
+        (!user.schoolId ||
+          user.schoolId.toString() !== req.school_id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students from your own school.",
+        });
+      }
+
+      /* School-level global status check */
+      if (
+        user.schoolId &&
+        (await isSchoolInactive(user.schoolId))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This school is currently inactive.",
+        });
+      }
+
+      /* Email uniqueness guard */
+      if (email && email !== user.email) {
+        const existing =
+          await User.findOne({ email });
+        if (existing) {
+          return res.status(409).json({
+            success: false,
+            message: "Email already in use.",
+          });
+        }
+      }
+
+      if (fullName) { user.fullName = fullName; }
+      if (email) { user.email = email; }
+      if (mobile !== undefined) { user.mobile = mobile; }
+
+      await user.save();
+
+      return res.json({
+        success: true,
+        message: "Student updated.",
+        student: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          mobile: user.mobile,
+          school: user.schoolId,
+          role: user.role,
+          isBlocked: user.isBlocked,
+          isApproved: user.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin update student error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update student.",
+      });
+    }
+  }
+);
+
+
+
+/* ---------- TEACHERS (users collection, role=teacher) ---------- */
+
+app.get(
+  "/api/admin/teachers",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const teachers =
+        await User.aggregate([
+          {
+            $match: req.school_id
+              ? {
+                  role: "teacher",
+                  schoolId: req.school_id,
+                }
+              : { role: "teacher" },
+          },
+          {
+            $lookup: {
+              from: "schools",
+              localField: "schoolId",
+              foreignField: "schoolId",
+              as: "school",
+            },
+          },
+          {
+            $unwind: {
+              path: "$school",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ]);
+
+      return res.json({
+        success: true,
+        teachers: teachers.map((t) => ({
+          _id: t._id,
+          fullName: t.fullName,
+          email: t.email,
+          mobile: t.mobile,
+          school: t.school
+            ? {
+                _id: t.school._id,
+                name: t.school.name,
+              }
+            : null,
+          class: t.class,
+          isBlocked: t.isBlocked,
+          isApproved: t.isApproved,
+          createdAt: t.createdAt,
+        })),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list teachers error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch teachers.",
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/admin/teachers",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        fullName,
+        email,
+        mobile,
+        password,
+        class: teacherClass,
+      } = req.body;
+
+      if (!fullName || !email || !password) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Full Name, Email and Password are required.",
+        });
+      }
+
+      const existing =
+        await User.findOne({
+          email,
+          role: "teacher",
+        });
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already registered.",
+        });
+      }
+
+      const teacher =
+        await User.create({
+          fullName,
+          email,
+          mobile: mobile || "",
+          password: hashPassword(password),
+          isBlocked: true,
+          isApproved: false,
+          role: "teacher",
+          schoolId: req.school_id,
+          class: teacherClass || "",
+        });
+
+      return res.status(201).json({
+        success: true,
+        message: "Teacher created.",
+        teacher: {
+          _id: teacher._id,
+          fullName: teacher.fullName,
+          email: teacher.email,
+          mobile: teacher.mobile,
+          school: teacher.schoolId,
+          class: teacher.class,
+          isBlocked: teacher.isBlocked,
+          isApproved: teacher.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin create teacher error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create teacher.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/admin/teachers/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        fullName,
+        email,
+        mobile,
+        password,
+        class: teacherClass,
+        isBlocked,
+      } = req.body;
+
+      const teacher =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !teacher ||
+        teacher.role !== "teacher"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: "Teacher not found.",
+        });
+      }
+
+      /* School scope check */
+      if (
+        req.school_id &&
+        (!teacher.schoolId ||
+          teacher.schoolId.toString() !== req.school_id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage teachers from your own school.",
+        });
+      }
+
+      /* School-level global status check */
+      if (
+        teacher.schoolId &&
+        (await isSchoolInactive(
+          teacher.schoolId
+        ))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This school is currently inactive.",
+        });
+      }
+
+      if (email && email !== teacher.email) {
+        const existing =
+          await User.findOne({
+            email,
+            role: "teacher",
+          });
+        if (existing) {
+          return res.status(409).json({
+            success: false,
+            message: "Email already in use.",
+          });
+        }
+      }
+
+      if (fullName) { teacher.fullName = fullName; }
+      if (email) { teacher.email = email; }
+      if (mobile !== undefined) { teacher.mobile = mobile; }
+      if (teacherClass !== undefined) { teacher.class = teacherClass; }
+      if (typeof isBlocked === "boolean") {
+        teacher.isBlocked = isBlocked;
+      }
+      if (password) {
+        teacher.password = hashPassword(password);
+      }
+
+      await teacher.save();
+
+      return res.json({
+        success: true,
+        message: "Teacher updated.",
+        teacher: {
+          _id: teacher._id,
+          fullName: teacher.fullName,
+          email: teacher.email,
+          mobile: teacher.mobile,
+          school: teacher.schoolId,
+          class: teacher.class,
+          isBlocked: teacher.isBlocked,
+          isApproved: teacher.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin update teacher error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update teacher.",
+      });
+    }
+  }
+);
+
+
+app.delete(
+  "/api/admin/teachers/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !teacher ||
+        teacher.role !== "teacher"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: "Teacher not found.",
+        });
+      }
+
+      /* School scope check */
+      if (
+        req.school_id &&
+        (!teacher.schoolId ||
+          teacher.schoolId.toString() !== req.school_id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage teachers from your own school.",
+        });
+      }
+
+      /* School-level global status check */
+      if (
+        teacher.schoolId &&
+        (await isSchoolInactive(
+          teacher.schoolId
+        ))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This school is currently inactive.",
+        });
+      }
+
+      await teacher.deleteOne();
+
+      return res.json({
+        success: true,
+        message: "Teacher removed.",
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin delete teacher error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete teacher.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/admin/teachers/:id/toggle-block",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !teacher ||
+        teacher.role !== "teacher"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Teacher not found.",
+        });
+      }
+
+      /* School scope check */
+      if (
+        req.school_id &&
+        (!teacher.schoolId ||
+          teacher.schoolId.toString() !== req.school_id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage teachers from your own school.",
+        });
+      }
+
+      if (
+        teacher.globalStatus ===
+        "inactive"
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Cannot modify a globally inactive account.",
+        });
+      }
+
+      /* School-level global status check */
+      if (teacher.schoolId) {
+        const _schoolDoc =
+          await School.findOne({
+            schoolId: teacher.schoolId
+          });
+        if (
+          _schoolDoc &&
+          _schoolDoc.globalStatus ===
+            "inactive"
+        ) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "Cannot modify an account whose school has been globally deactivated.",
+          });
+        }
+      }
+
+      teacher.isBlocked =
+        !teacher.isBlocked;
+      teacher.isApproved =
+        !teacher.isBlocked;
+
+      await teacher.save();
+
+      return res.json({
+        success: true,
+        message: teacher.isBlocked
+          ? "Teacher blocked."
+          : "Teacher allowed.",
+        teacher: {
+          _id: teacher._id,
+          fullName:
+            teacher.fullName,
+          email: teacher.email,
+          mobile: teacher.mobile,
+          school: teacher.schoolId,
+          isBlocked:
+            teacher.isBlocked,
+          isApproved:
+            teacher.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin toggle teacher error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to update teacher.",
+      });
+    }
+  }
+);
+
+
+/* ---------- SCHOOLS ---------- */
+
+/* ---------- SCHOOLS ---------- */
+
+app.get(
+  "/api/admin/schools",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const schools =
+        await School
+          .find({})
+          .sort({ createdAt: -1 });
+
+      return res.json({
+        success: true,
+        schools,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list schools error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch schools.",
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/admin/schools",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        established,
+      } = req.body;
+
+      if (!name) {
+        return res.status(400).json({
+          success: false,
+          message: "School name is required.",
+        });
+      }
+
+      const school =
+        await School.create({
+          name,
+          address: address || "",
+          contactEmail: contactEmail || "",
+          contactPhone: contactPhone || "",
+          established: established
+            ? new Date(established)
+            : null,
+        });
+
+      return res.status(201).json({
+        success: true,
+        message: "School created.",
+        school,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin create school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create school.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/admin/schools/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        established,
+      } = req.body;
+
+      const school =
+        await School.findById(req.params.id);
+
+      if (!school) {
+        return res.status(404).json({
+          success: false,
+          message: "School not found.",
+        });
+      }
+
+      if (name) { school.name = name; }
+      if (address !== undefined) {
+        school.address = address;
+      }
+      if (contactEmail !== undefined) {
+        school.contactEmail = contactEmail;
+      }
+      if (contactPhone !== undefined) {
+        school.contactPhone = contactPhone;
+      }
+      if (established !== undefined) {
+        school.established = established
+          ? new Date(established)
+          : null;
+      }
+
+      await school.save();
+
+      return res.json({
+        success: true,
+        message: "School updated.",
+        school,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin update school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update school.",
+      });
+    }
+  }
+);
+
+
+app.delete(
+  "/api/admin/schools/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const school =
+        await School.findById(req.params.id);
+
+      if (!school) {
+        return res.status(404).json({
+          success: false,
+          message: "School not found.",
+        });
+      }
+
+      await school.deleteOne();
+
+      return res.json({
+        success: true,
+        message: "School removed.",
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin delete school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete school.",
+      });
+    }
+  }
+);
+
+
+/* ---------- PATHWAYS & TOPICS (content) ---------- */
+
+app.get(
+  "/api/admin/pathways",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const pathways =
+        await Pathway
+          .find({})
+          .sort({ createdAt: -1 });
+
+      return res.json({
+        success: true,
+        pathways,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list pathways error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch pathways.",
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/admin/pathways",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        name,
+        description,
+        topics,
+      } = req.body;
+
+      if (!name) {
+        return res.status(400).json({
+          success: false,
+          message: "Pathway name is required.",
+        });
+      }
+
+      const pathway =
+        await Pathway.create({
+          name,
+          description: description || "",
+          topics: topics || [],
+        });
+
+      return res.status(201).json({
+        success: true,
+        message: "Pathway created.",
+        pathway,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin create pathway error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create pathway.",
+      });
+    }
+  }
+);
+
+
+app.get(
+  "/api/admin/pathways/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const pathway =
+        await Pathway.findById(req.params.id);
+
+      if (!pathway) {
+        return res.status(404).json({
+          success: false,
+          message: "Pathway not found.",
+        });
+      }
+
+      return res.json({
+        success: true,
+        pathway,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin get pathway error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch pathway.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/admin/pathways/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        name,
+        description,
+        topics,
+      } = req.body;
+
+      const pathway =
+        await Pathway.findById(req.params.id);
+
+      if (!pathway) {
+        return res.status(404).json({
+          success: false,
+          message: "Pathway not found.",
+        });
+      }
+
+      if (name) { pathway.name = name; }
+      if (description !== undefined) {
+        pathway.description = description;
+      }
+      if (topics !== undefined) {
+        pathway.topics = topics;
+      }
+
+      await pathway.save();
+
+      return res.json({
+        success: true,
+        message: "Pathway updated.",
+        pathway,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin update pathway error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update pathway.",
+      });
+    }
+  }
+);
+
+
+app.delete(
+  "/api/admin/pathways/:id",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const pathway =
+        await Pathway.findById(req.params.id);
+
+      if (!pathway) {
+        return res.status(404).json({
+          success: false,
+          message: "Pathway not found.",
+        });
+      }
+
+      await pathway.deleteOne();
+
+      return res.json({
+        success: true,
+        message: "Pathway removed.",
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin delete pathway error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete pathway.",
+      });
+    }
+  }
+);
+
+
+/* ---------- STUDENT PROGRESS ---------- */
+
+app.get(
+  "/api/admin/progress",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const filter = {};
+      if (req.query.student) {
+        filter.user = req.query.student;
+      }
+      if (req.query.topic) {
+        filter.topic = req.query.topic;
+      }
+
+      const progress =
+        await Progress
+          .find(filter)
+          .populate("user", "fullName email")
+          .sort({ completedAt: -1 });
+
+      /* Batch-fetch school names by schoolId string */
+      const progressSchoolIds =
+        [
+          ...new Set(
+            progress
+              .map((p) => p.school)
+              .filter(Boolean)
+          ),
+        ];
+      const progressSchools =
+        await School.find({
+          schoolId: {
+            $in: progressSchoolIds,
+          },
+        });
+      const progressSchoolMap = {};
+      progressSchools.forEach(
+        (s) => {
+          progressSchoolMap[s.schoolId] =
+            s;
+        }
+      );
+
+      return res.json({
+        success: true,
+        progress: progress.map((p) => ({
+          _id: p._id,
+          user: p.user
+            ? {
+                _id: p.user._id,
+                fullName:
+                  p.user.fullName,
+                email: p.user.email,
+              }
+            : null,
+          userName:
+            p.user
+              ? p.user.fullName
+              : p.userName ||
+                "Student",
+          school:
+            p.school &&
+            progressSchoolMap[p.school]
+              ? {
+                  _id: progressSchoolMap[
+                    p.school
+                  ]._id,
+                  name: progressSchoolMap[
+                    p.school
+                  ].name,
+                }
+              : null,
+          pathway: p.pathway,
+          topic: p.topic,
+          subtopic: p.subtopic,
+          lesson: p.lesson,
+          activity: p.activity,
+          status: p.status,
+          score: p.score,
+          maxScore: p.maxScore,
+          completedAt:
+            p.completedAt,
+        })),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list progress error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch progress.",
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/admin/progress",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        user,
+        school,
+        pathway,
+        topic,
+        subtopic,
+        lesson,
+        activity,
+        status,
+        score,
+        maxScore,
+      } = req.body;
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "Student (user) is required.",
+        });
+      }
+
+      const owner =
+        await User.findById(user);
+      if (!owner) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found.",
+        });
+      }
+
+      const filter = {
+        user,
+        pathway: pathway || "",
+        topic: topic || "",
+        subtopic: subtopic || "",
+        lesson: lesson || "",
+      };
+
+      const update = {
+        school: school || null,
+        activity: activity || "",
+        status: status || "completed",
+        score: score || 0,
+        maxScore: maxScore || 0,
+        completedAt: new Date(),
+      };
+
+      const record =
+        await Progress.findOneAndUpdate(
+          filter,
+          update,
+          {
+            upsert: true,
+            returnDocument: "after",
+            setDefaultsOnInsert: true,
+          }
+        );
+
+      return res.status(201).json({
+        success: true,
+        message: "Progress recorded.",
+        progress: record,
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin record progress error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to record progress.",
+      });
+    }
+  }
+);
+
+
+/* ---------- RESULTS & REPORTS ---------- */
+
+app.get(
+  "/api/admin/results",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const filter = {};
+      if (req.query.student) {
+        filter.user = req.query.student;
+      }
+      if (req.query.challengeType) {
+        filter.challengeType =
+          req.query.challengeType;
+      }
+
+      const results =
+        await Result
+          .find(filter)
+          .populate("user", "fullName email")
+          .sort({ completedAt: -1 });
+
+      /* Batch-fetch school names by schoolId string */
+      const resultsSchoolIds =
+        [
+          ...new Set(
+            results
+              .map((r) => r.school)
+              .filter(Boolean)
+          ),
+        ];
+      const resultsSchools =
+        await School.find({
+          schoolId: {
+            $in: resultsSchoolIds,
+          },
+        });
+      const resultsSchoolMap = {};
+      resultsSchools.forEach(
+        (s) => {
+          resultsSchoolMap[s.schoolId] =
+            s;
+        }
+      );
+
+      return res.json({
+        success: true,
+        results: results.map((r) => ({
+          _id: r._id,
+          user: r.user
+            ? {
+                _id: r.user._id,
+                fullName:
+                  r.user.fullName,
+                email: r.user.email,
+              }
+            : null,
+          userName:
+            r.user
+              ? r.user.fullName
+              : r.userName ||
+                "Student",
+          school:
+            r.school &&
+            resultsSchoolMap[r.school]
+              ? {
+                  _id: resultsSchoolMap[
+                    r.school
+                  ]._id,
+                  name: resultsSchoolMap[
+                    r.school
+                  ].name,
+                }
+              : null,
+          challengeType: r.challengeType,
+          score: r.score,
+          maxScore: r.maxScore,
+          passed: r.passed,
+          answers: r.answers,
+          completedAt: r.completedAt,
+        })),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Admin list results error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch results.",
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/admin/results",
+  async (req, res) => {
+    if (!(await isAdminAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message: "Database is not connected.",
+        });
+      }
+
+      const {
+        user,
+        school,
+        challengeType,
+        score,
+        maxScore,
+        passed,
+        answers,
+      } = req.body;
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "Student (user) is required.",
+        });
+      }
+
+      const owner =
+        await User.findById(user);
+      if (!owner) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found.",
+        });
+      }
+
+      const result =
+        await Result.create({
+          user,
+          school: school || null,
+          challengeType: challengeType || "",
+          score: score || 0,
+          maxScore: maxScore || 25,
+          passed: passed !== undefined ? passed : false,
+          answers: answers || [],
+        });
+
+      return res.status(201).json({
+        success: true,
+        message: "Result recorded.",
+        result: {
+          _id: result._id,
+          user: result.user
+            ? {
+                _id: result.user._id,
+                fullName: result.user.fullName,
+                email: result.user.email,
+              }
+            : null,
+          userName:
+            result.user
+              ? result.user.fullName
+              : result.userName ||
+                "",
+          school: result.school,
+          challengeType: result.challengeType,
+          score: result.score,
+          maxScore: result.maxScore,
+          passed: result.passed,
+          answers: result.answers,
+          completedAt: result.completedAt,
+        },
+      });
+     } catch (err) {
+      console.log(
+        "❌ Admin record result error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to record result.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   STUDENT: SAVE PROGRESS
+   Records a student's progress on a lesson/activity.
+   Called by the student-facing app.
+========================================================= */
+
+app.post(
+  "/api/student/save-progress",
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const {
+        userName,
+        email,
+        pathway,
+        topic,
+        subtopic,
+        lesson,
+        activity,
+        status,
+        score,
+        maxScore,
+      } = req.body;
+
+      if (!userName && !email) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "userName or email is required.",
+        });
+      }
+
+      let userDoc = null;
+
+      if (email) {
+        userDoc =
+          await User.findOne({ email });
+      }
+
+      if (!userDoc && userName) {
+        userDoc =
+          await User.findOne({
+            fullName: {
+              $regex: new RegExp(
+                "^" + userName + "$",
+                "i"
+              ),
+            },
+          });
+      }
+
+      /* School-level global status check */
+      if (
+        userDoc &&
+        userDoc.schoolId &&
+        (await isSchoolInactive(
+          userDoc.schoolId
+        ))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This school is currently inactive.",
+        });
+      }
+
+      const filter = {
+        user: userDoc
+          ? userDoc._id
+          : null,
+        pathway: pathway || "",
+        topic: topic || "",
+        subtopic: subtopic || "",
+        lesson: lesson || "",
+      };
+
+      const update = {
+        school: userDoc
+          ? userDoc.schoolId
+          : null,
+        activity: activity || "",
+        status:
+          status ||
+          (score === maxScore && maxScore > 0
+            ? "completed"
+            : "in_progress"),
+        score: Number(score) || 0,
+        maxScore: Number(maxScore) || 0,
+        completedAt: new Date(),
+      };
+
+      if (userDoc) {
+        await Progress.updateOne(
+          filter,
+          {
+            $setOnInsert: {
+              school:
+                userDoc.schoolId || null,
+            },
+            $set: {
+              activity:
+                update.activity,
+              status: update.status,
+              score: update.score,
+              maxScore:
+                update.maxScore,
+              completedAt:
+                update.completedAt,
+            },
+          },
+          { upsert: true }
+        );
+      } else {
+        await Progress.create({
+          ...filter,
+          ...update,
+          user: null,
+          userName:
+            userName || "Student",
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "Progress recorded.",
+        progress: {
+          pathway: pathway || "",
+          topic: topic || "",
+          subtopic: subtopic || "",
+          lesson: lesson || "",
+          activity: activity || "",
+          status: update.status,
+          score: update.score,
+          maxScore: update.maxScore,
+          completedAt: update.completedAt,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Student save progress error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to record progress.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   STUDENT: SAVE RESULT
+   Records a student's final challenge result.
+   Called by the student-facing app.
+   Creates a Result document linked to the User.
+   (FinalChallengeResult is still saved by the
+    /api/final-challenge/save-result endpoint.)
+========================================================= */
+
+app.post(
+  "/api/student/save-result",
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const {
+        userName,
+        email,
+        challengeType,
+        score,
+        maxScore,
+        passed,
+        answers,
+      } = req.body;
+
+      if (!userName && !email) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "userName or email is required.",
+        });
+      }
+
+      let userDoc = null;
+
+      if (email) {
+        userDoc =
+          await User.findOne({ email });
+      }
+
+      if (!userDoc && userName) {
+        userDoc =
+          await User.findOne({
+            fullName: {
+              $regex: new RegExp(
+                "^" + userName + "$",
+                "i"
+              ),
+            },
+          });
+      }
+
+      /* School-level global status check */
+      if (
+        userDoc &&
+        userDoc.schoolId &&
+        (await isSchoolInactive(
+          userDoc.schoolId
+        ))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This school is currently inactive.",
+        });
+      }
+
+      const result =
+        await Result.create({
+          user: userDoc
+            ? userDoc._id
+            : null,
+          userName:
+            userName || "Student",
+          school: userDoc
+            ? userDoc.schoolId
+            : null,
+          challengeType:
+            challengeType || "",
+          score:
+            Number(score) || 0,
+          maxScore:
+            Number(maxScore) || 25,
+          passed:
+            passed !== undefined
+              ? passed
+              : false,
+          answers:
+            answers || [],
+        });
+
+      /* Also record progress for this challenge */
+
+      if (userDoc) {
+        const passedFlag =
+          passed !== undefined
+            ? passed
+            : false;
+
+        await Progress.updateOne(
+          {
+            user: userDoc._id,
+            pathway: "Pathway",
+            topic:
+              challengeType ||
+              "Final Challenge",
+            subtopic:
+              "Final Challenge",
+            lesson:
+              challengeType ||
+              "Final Challenge",
+          },
+          {
+            $setOnInsert: {
+              school:
+                userDoc.schoolId ||
+                null,
+            },
+            $set: {
+              activity:
+                "final_challenge",
+              status: passedFlag
+                ? "completed"
+                : "in_progress",
+              score:
+                Number(score) || 0,
+              maxScore:
+                Number(maxScore) ||
+                25,
+              completedAt:
+                new Date(),
+            },
+          },
+          { upsert: true }
+        );
+      }
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "Result recorded.",
+        result: {
+          _id: result._id,
+          userName:
+            result.userName,
+          school: result.school,
+          challengeType:
+            result.challengeType,
+          score: result.score,
+          maxScore:
+            result.maxScore,
+          passed: result.passed,
+          answers: result.answers,
+          completedAt:
+            result.completedAt,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Student save result error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to record result.",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   TEACHER DASHBOARD ROUTES
+   Authenticated via teacherTokens.
+   Teachers see students, progress, and results from
+   their assigned school.
+========================================================= */
+
+app.get(
+  "/api/teacher/summary",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      const schoolId = teacher
+        ? teacher.schoolId
+        : null;
+
+      let studentFilter = {};
+
+      if (schoolId) {
+        studentFilter = {
+          role: "student",
+          schoolId: schoolId,
+        };
+        if (teacher.class) {
+          studentFilter.class = teacher.class;
+        }
+      } else {
+        studentFilter = {
+          role: "student",
+        };
+      }
+
+      const [
+        totalStudents,
+        approvedStudents,
+        pendingStudents,
+        results,
+        progress,
+      ] = await Promise.all([
+        User.countDocuments(
+          studentFilter
+        ),
+        User.countDocuments({
+          ...studentFilter,
+          isApproved: true,
+        }),
+        User.countDocuments({
+          ...studentFilter,
+          isApproved: false,
+        }),
+        Result.countDocuments({
+          school: schoolId,
+        }),
+        Progress.countDocuments({
+          school: schoolId,
+        }),
+      ]);
+
+      return res.json({
+        success: true,
+        summary: {
+          students: totalStudents,
+          approvedStudents,
+          pendingStudents,
+          results,
+          progress,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher summary error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch summary.",
+      });
+    }
+  }
+);
+
+
+app.get(
+  "/api/teacher/students",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      let students;
+
+      if (teacher && teacher.schoolId) {
+        const query = {
+          role: "student",
+          schoolId: teacher.schoolId,
+        };
+        if (teacher.class) {
+          query.class = teacher.class;
+        }
+        students = await User
+          .find(query)
+          .sort({
+            createdAt: -1,
+          });
+      } else {
+        students = await User
+          .find({ role: "student" })
+          .sort({
+            createdAt: -1,
+          });
+      }
+
+      return res.json({
+        success: true,
+            students: students.map(
+              (s) => ({
+                _id: s._id,
+                fullName: s.fullName,
+                email: s.email,
+                mobile: s.mobile,
+                school: s.schoolId
+                  ? s.schoolId.toString()
+                  : null,
+                class: s.class,
+                role: s.role,
+                isBlocked:
+                  s.isBlocked,
+              isApproved:
+                s.isApproved,
+              createdAt:
+                s.createdAt,
+            })
+          ),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher list students error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch students.",
+      });
+    }
+  }
+);
+
+
+app.get(
+  "/api/teacher/results",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      let schoolFilter = {};
+
+      if (
+        teacher &&
+        teacher.schoolId
+      ) {
+        schoolFilter = {
+          school: teacher.schoolId,
+        };
+      }
+
+      const results =
+        await Result
+          .find(schoolFilter)
+          .populate(
+            "user",
+            "fullName email"
+          )
+          .populate(
+            "school",
+            "name"
+          )
+          .sort({
+            completedAt: -1,
+          });
+
+      return res.json({
+        success: true,
+        results: results.map(
+          (r) => ({
+            _id: r._id,
+            user: r.user
+              ? {
+                  _id: r.user._id,
+                  fullName:
+                    r.user.fullName,
+                  email:
+                    r.user.email,
+                }
+              : null,
+            userName:
+              r.user
+                ? r.user.fullName
+                : r.userName ||
+                  "",
+            school: r.school
+              ? {
+                  _id: r.school._id,
+                  name:
+                    r.school.name,
+                }
+              : null,
+            challengeType:
+              r.challengeType,
+            score: r.score,
+            maxScore:
+              r.maxScore,
+            passed: r.passed,
+            answers: r.answers,
+            completedAt:
+              r.completedAt,
+          })
+        ),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher results error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch results.",
+      });
+    }
+  }
+);
+
+
+app.get(
+  "/api/teacher/progress",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      let schoolFilter = {};
+
+      if (
+        teacher &&
+        teacher.schoolId
+      ) {
+        schoolFilter = {
+          school: teacher.schoolId,
+        };
+      }
+
+      const progress =
+        await Progress
+          .find(schoolFilter)
+          .populate(
+            "user",
+            "fullName email"
+          )
+          .populate(
+            "school",
+            "name"
+          )
+          .sort({
+            completedAt: -1,
+          });
+
+      return res.json({
+        success: true,
+        progress: progress.map(
+          (p) => ({
+            _id: p._id,
+            user: p.user
+              ? {
+                  _id: p.user._id,
+                  fullName:
+                    p.user.fullName,
+                  email:
+                    p.user.email,
+                }
+              : null,
+            userName:
+              p.user
+                ? p.user.fullName
+                : p.userName ||
+                  "",
+            pathway:
+              p.pathway,
+            topic: p.topic,
+            subtopic:
+              p.subtopic,
+            lesson: p.lesson,
+            activity:
+              p.activity,
+            status: p.status,
+            score: p.score,
+            maxScore:
+              p.maxScore,
+            completedAt:
+              p.completedAt,
+          })
+        ),
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher progress error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch progress.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/teacher/students/:id/toggle-block",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    if (!isMongoConnected()) {
+      return res.status(503).json({
+        success: false,
+        message: "Database is not connected.",
+      });
+    }
+
+    try {
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      if (!teacher) {
+        return res.status(403).json({
+          success: false,
+          message: "Teacher not found.",
+        });
+      }
+
+      const student =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !student ||
+        student.role !== "student"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found.",
+        });
+      }
+
+      /*
+          Teacher can only manage students in
+          their own school and class
+      */
+      if (
+        !teacher.schoolId ||
+        !student.schoolId ||
+        String(student.schoolId) !==
+          String(teacher.schoolId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students from your own school.",
+        });
+      }
+
+      if (
+        teacher.class &&
+        student.class &&
+        teacher.class !==
+          student.class
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students in your class.",
+        });
+      }
+
+      student.isBlocked =
+        !student.isBlocked;
+      student.isApproved =
+        !student.isBlocked;
+
+      await student.save();
+
+      return res.json({
+        success: true,
+        message: student.isBlocked
+          ? "Student blocked."
+          : "Student approved.",
+        student: {
+          _id: student._id,
+          fullName: student.fullName,
+          email: student.email,
+          isBlocked: student.isBlocked,
+          isApproved: student.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher toggle student error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update student.",
+      });
+    }
+  }
+);
+
+
+app.put(
+  "/api/teacher/students/:id",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const {
+        fullName,
+        email,
+        mobile,
+        isBlocked,
+        isApproved,
+      } = req.body;
+
+      const student =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !student ||
+        student.role !== "student"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Student not found.",
+        });
+      }
+
+       const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+      if (
+        !teacher ||
+        (student.schoolId &&
+          (!teacher.schoolId ||
+            String(student.schoolId) !==
+              String(teacher.schoolId)))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students in your school.",
+        });
+      }
+
+       /* Class scope check — teacher can only manage
+          students in their assigned class */
+      if (
+        teacher.class &&
+        student.class &&
+        teacher.class !== student.class
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students in your class.",
+        });
+      }
+
+      if (email && email !== student.email) {
+        const existing =
+          await User.findOne({ email });
+        if (existing) {
+          return res.status(409).json({
+            success: false,
+            message:
+              "Email already in use.",
+          });
+        }
+      }
+
+      if (fullName) { student.fullName = fullName; }
+      if (email) { student.email = email; }
+      if (mobile !== undefined) { student.mobile = mobile; }
+      if (typeof isBlocked === "boolean") {
+        student.isBlocked = isBlocked;
+        student.isApproved = !isBlocked;
+      }
+      if (typeof isApproved === "boolean") {
+        student.isApproved = isApproved;
+        if (isApproved) {
+          student.isBlocked = false;
+        }
+      }
+
+      await student.save();
+
+      return res.json({
+        success: true,
+        message: "Student updated.",
+        student: {
+          _id: student._id,
+          fullName: student.fullName,
+          email: student.email,
+          mobile: student.mobile,
+          school: student.schoolId,
+          class: student.class,
+          role: student.role,
+          isBlocked: student.isBlocked,
+          isApproved: student.isApproved,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher update student error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to update student.",
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/teacher/students/:id",
+  async (req, res) => {
+    if (!(await isTeacherAuthed(req))) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Unauthorized.",
+      });
+    }
+
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const student =
+        await User.findById(
+          req.params.id
+        );
+
+      if (
+        !student ||
+        student.role !== "student"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Student not found.",
+        });
+      }
+
+      const teacher =
+        await User.findById(
+          req.user_id
+        );
+
+       if (
+        !teacher ||
+        (student.schoolId &&
+          (!teacher.schoolId ||
+            String(student.schoolId) !==
+              String(teacher.schoolId)))
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students in your school.",
+        });
+      }
+
+      /* Class scope check — teacher can only manage
+          students in their assigned class */
+      if (
+        teacher.class &&
+        student.class &&
+        teacher.class !== student.class
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You can only manage students in your class.",
+        });
+      }
+
+      await student.deleteOne();
+
+      return res.json({
+        success: true,
+        message:
+          "Student removed.",
+      });
+    } catch (err) {
+      console.log(
+        "❌ Teacher delete student error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to delete student.",
+      });
+    }
+  }
+);
 
 /* =========================================================
    START SERVER
 ========================================================= */
 
 const PORT =
-  process.env.PORT || 5000;
+    process.env.PORT || 5000;
 
 /* =========================================================
    GROQ MODEL TEST
@@ -12268,9 +16083,811 @@ app.get("/api/groq-models", async (req, res) => {
   }
 });
 
+/* =========================================================
+   SYNC .env CREDENTIALS TO MONGODB
+   Ensures teacher seed accounts exist with
+   approved+allowed status so they can log in via
+   /api/login immediately.
+ ========================================================= */
+
+async function syncSeedAccounts() {
+  if (mongooseConnectPromise) {
+    await mongooseConnectPromise.catch(() => {});
+  }
+
+  if (!isMongoConnected()) {
+    console.log("⚠️  MongoDB not connected — skipping seed sync");
+    return;
+  }
+
+  let seedSchool;
+
+  try {
+    seedSchool =
+      await School.findOne({
+        schoolId: "SEED_SCHOOL",
+      });
+
+    if (!seedSchool) {
+      seedSchool =
+        await School.create({
+          schoolId: "SEED_SCHOOL",
+          name: "Fluento Seed School",
+          address: "",
+          contactEmail: "",
+          contactPhone: "",
+          established: null,
+        });
+      console.log("🏫 Seed school created");
+    }
+  } catch (err) {
+    console.log("❌ Seed school sync error:", err.message);
+    return;
+  }
+
+  try {
+    const existingTeacher =
+      await User.findOne({
+        email: TEACHER_EMAIL,
+        role: "teacher",
+      });
+
+    if (existingTeacher) {
+      existingTeacher.password =
+        hashPassword(TEACHER_PASSWORD);
+      existingTeacher.isBlocked = false;
+      existingTeacher.isApproved = true;
+      existingTeacher.schoolId =
+        seedSchool.schoolId;
+      await existingTeacher.save();
+      console.log("🔑 Teacher synced:", TEACHER_EMAIL);
+    } else {
+      await User.create({
+        fullName: "Teacher User",
+        email: TEACHER_EMAIL,
+        mobile: "",
+        password: hashPassword(
+          TEACHER_PASSWORD
+        ),
+        isBlocked: false,
+        isApproved: true,
+        role: "teacher",
+        schoolId: seedSchool.schoolId,
+      });
+      console.log("🔑 Teacher created:", TEACHER_EMAIL);
+    }
+    } catch (err) {
+      console.log("❌ Teacher sync error:", err.message);
+    }
+
+    /* -------- Seed default classes -------- */
+    try {
+      const defaultClasses =
+        ["5", "6", "7", "8", "9", "10"];
+      for (const className of defaultClasses) {
+        await Class.findOneAndUpdate(
+          {
+            name: className,
+            schoolId: null,
+          },
+          {
+            name: className,
+            schoolId: null,
+          },
+          { upsert: true, new: true }
+        );
+      }
+      console.log("📚 Default classes seeded");
+    } catch (err) {
+      console.log("❌ Class seed error:", err.message);
+    }
+  }
+
+/* =========================================================
+   SUPER ADMIN API ROUTES
+   Overview: global summary, list users across all
+   collections, toggle globalStatus (active/inactive).
+   All routes scoped via requireSuperAdmin middleware.
+========================================================= */
+
+app.get(
+  "/api/superadmin/summary",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      const [
+        schools,
+        admins,
+        teachers,
+        students
+      ] = await Promise.all([
+        School.countDocuments(),
+        User.countDocuments({
+          role: "admin"
+        }),
+        User.countDocuments({
+          role: "teacher"
+        }),
+        User.countDocuments({
+          role: "student"
+        })
+      ]);
+
+      res.json({
+        success: true,
+        schools,
+        admins,
+        teachers,
+        students
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/superadmin/schools",
+  requireSuperAdmin,
+  async (req, res) => {
+    if (!isMongoConnected()) {
+      return res.status(503).json({
+        success: false,
+        message:
+          "Database is not connected.",
+      });
+    }
+
+    try {
+      const schools =
+        await School
+          .find({})
+          .sort({
+            createdAt: -1
+          });
+      res.json({
+        success: true,
+        schools: schools.map((s) => ({
+          _id: s._id,
+          schoolId: s.schoolId,
+          name: s.name,
+          address: s.address,
+          contactEmail: s.contactEmail,
+          contactPhone: s.contactPhone,
+          established: s.established,
+          globalStatus:
+            s.globalStatus || "active",
+          createdAt: s.createdAt,
+        })),
+      });
+    } catch (err) {
+      console.log(
+        "❌ SuperAdmin list schools error:",
+        err
+      );
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+/* ---------- SCHOOL: CREATE (with Admin account) ---------- */
+
+app.post(
+  "/api/superadmin/schools",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const {
+        schoolId,
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        established,
+        adminFullName,
+        adminEmail,
+        adminPassword,
+        adminMobile,
+      } = req.body;
+
+      if (!schoolId || !name) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "School ID and School Name are required.",
+        });
+      }
+
+      if (
+        !adminFullName ||
+        !adminEmail ||
+        !adminPassword
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Admin Full Name, Email, and Password are required.",
+        });
+      }
+
+      const existingSchoolId =
+        await School.findOne({
+          schoolId: schoolId
+        });
+      if (existingSchoolId) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "A school with this School ID already exists.",
+        });
+      }
+
+      const existingSchool =
+        await School.findOne({ name });
+      if (existingSchool) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "A school with this name already exists.",
+        });
+      }
+
+      const existingAdmin =
+        await User.findOne({
+          email: adminEmail,
+        });
+      if (existingAdmin) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "An account with this admin email already exists.",
+        });
+      }
+
+      const school =
+        await School.create({
+          schoolId: schoolId,
+          name,
+          address: address || "",
+          contactEmail: contactEmail || "",
+          contactPhone: contactPhone || "",
+          established: established
+            ? new Date(established)
+            : null,
+        });
+
+      const admin =
+        await User.create({
+          username:
+            adminEmail,
+          fullName: adminFullName,
+          email: adminEmail,
+          mobile: adminMobile || "",
+          password: hashPassword(adminPassword),
+          role: "admin",
+          isBlocked: false,
+          isApproved: true,
+          globalStatus:
+            "active",
+          schoolId: school.schoolId,
+        });
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "School and admin account created.",
+        school: {
+          _id: school._id,
+          schoolId: school.schoolId,
+          name: school.name,
+          address: school.address,
+          contactEmail:
+            school.contactEmail,
+          contactPhone:
+            school.contactPhone,
+          established: school.established,
+          globalStatus:
+            school.globalStatus || "active",
+          createdAt:
+            school.createdAt,
+        },
+        admin: {
+          _id: admin._id,
+          fullName:
+            admin.fullName,
+          email: admin.email,
+          mobile: admin.mobile,
+          role: admin.role,
+          school:
+            school._id,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ SuperAdmin create school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+/* ---------- SCHOOL: UPDATE ---------- */
+
+app.put(
+  "/api/superadmin/schools/:id",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const {
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        established,
+      } = req.body;
+
+      const school =
+        await School.findById(req.params.id);
+
+      if (!school) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "School not found.",
+        });
+      }
+
+      if (name !== undefined) {
+        school.name = name;
+      }
+      if (address !== undefined) {
+        school.address = address;
+      }
+      if (contactEmail !== undefined) {
+        school.contactEmail = contactEmail;
+      }
+      if (contactPhone !== undefined) {
+        school.contactPhone = contactPhone;
+      }
+      if (established !== undefined) {
+        school.established = established
+          ? new Date(established)
+          : null;
+      }
+
+      await school.save();
+
+      return res.json({
+        success: true,
+        message:
+          "School updated.",
+        school: {
+          _id: school._id,
+          schoolId: school.schoolId,
+          name: school.name,
+          address: school.address,
+          contactEmail:
+            school.contactEmail,
+          contactPhone:
+            school.contactPhone,
+          established:
+            school.established,
+          globalStatus:
+            school.globalStatus || "active",
+          createdAt:
+            school.createdAt,
+        },
+      });
+    } catch (err) {
+      console.log(
+        "❌ SuperAdmin update school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+/* ---------- SCHOOL: DELETE ---------- */
+
+app.delete(
+  "/api/superadmin/schools/:id",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const school =
+        await School.findById(req.params.id);
+
+      if (!school) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "School not found.",
+        });
+      }
+
+      await school.deleteOne();
+
+      await User.updateMany(
+        { school: school._id },
+        {
+          $set: {
+            schoolId: null
+          }
+        }
+      );
+
+      return res.json({
+        success: true,
+        message:
+          "School removed.",
+      });
+    } catch (err) {
+      console.log(
+        "❌ SuperAdmin delete school error:",
+        err
+      );
+      return res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/superadmin/admins",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      const admins =
+        await User.aggregate([
+          {
+            $match: {
+              role: "admin",
+            },
+          },
+          {
+            $lookup: {
+              from: "schools",
+              localField: "schoolId",
+              foreignField: "schoolId",
+              as: "school",
+            },
+          },
+          {
+            $unwind: {
+              path: "$school",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ]);
+      res.json({
+        success: true,
+        admins: admins.map((a) => ({
+          _id: a._id,
+          fullName: a.fullName,
+          email: a.email,
+          mobile: a.mobile,
+          role: a.role,
+          isBlocked: a.isBlocked,
+          isApproved: a.isApproved,
+          globalStatus:
+            a.globalStatus || "active",
+          school: a.school
+            ? {
+                _id: a.school._id,
+                name: a.school.name,
+              }
+            : null,
+          createdAt: a.createdAt,
+        })),
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/superadmin/teachers",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      const teachers =
+        await User.aggregate([
+          {
+            $match: {
+              role: "teacher",
+            },
+          },
+          {
+            $lookup: {
+              from: "schools",
+              localField: "schoolId",
+              foreignField: "schoolId",
+              as: "school",
+            },
+          },
+          {
+            $unwind: {
+              path: "$school",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ]);
+      res.json({
+        success: true,
+        teachers: teachers.map((t) => ({
+          _id: t._id,
+          fullName: t.fullName,
+          email: t.email,
+          mobile: t.mobile,
+          role: t.role,
+          isBlocked: t.isBlocked,
+          isApproved: t.isApproved,
+          globalStatus:
+            t.globalStatus || "active",
+          school: t.school
+            ? {
+                _id: t.school._id,
+                name: t.school.name,
+              }
+            : null,
+          createdAt: t.createdAt,
+        })),
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/superadmin/students",
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      if (!isMongoConnected()) {
+        return res.status(503).json({
+          success: false,
+          message:
+            "Database is not connected.",
+        });
+      }
+
+      const students =
+        await User.aggregate([
+          {
+            $match: {
+              role: "student",
+            },
+          },
+          {
+            $lookup: {
+              from: "schools",
+              localField: "schoolId",
+              foreignField: "schoolId",
+              as: "school",
+            },
+          },
+          {
+            $unwind: {
+              path: "$school",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ]);
+
+      res.json({
+        success: true,
+        students: students.map((s) => ({
+          _id: s._id,
+          username: s.username,
+          fullName: s.fullName,
+          email: s.email,
+          mobile: s.mobile,
+          role: s.role,
+          isBlocked: s.isBlocked,
+          isApproved: s.isApproved,
+          globalStatus:
+            s.globalStatus || "active",
+          school: s.school
+            ? {
+                _id: s.school._id,
+                name: s.school.name,
+              }
+            : null,
+          createdAt: s.createdAt,
+        })),
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
+app.put(
+  "/api/superadmin/:role/:id/toggle-status",
+  requireSuperAdmin,
+  async (req, res) => {
+    const {
+      role,
+      id
+    } = req.params;
+
+    let Model;
+    let responseKey;
+    let isSchoolLevel = false;
+
+    if (
+      role ===
+      "school"
+    ) {
+      Model =
+        School;
+      responseKey = "school";
+      isSchoolLevel = true;
+    } else if (
+      role ===
+      "admin"
+    ) {
+      Model =
+        User;
+      responseKey = "admin";
+    } else if (
+      role ===
+      "teacher"
+    ) {
+      Model =
+        User;
+      responseKey = "teacher";
+    } else if (
+      role ===
+      "student"
+    ) {
+      Model =
+        User;
+      responseKey = "student";
+    } else {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid role."
+      });
+    }
+
+    try {
+      let query =
+        { _id: id };
+
+      if (
+        role ===
+        "teacher"
+      ) {
+        query.role =
+          "teacher";
+      } else if (
+        role ===
+        "student"
+      ) {
+        query.role =
+          "student";
+      }
+
+      const doc =
+        await Model.findOne(
+          query
+        );
+
+      if (!doc) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "User not found."
+        });
+      }
+
+      doc.globalStatus =
+        doc.globalStatus ===
+        "active"
+          ? "inactive"
+          : "active";
+
+      await doc.save();
+
+      res.json({
+        success: true,
+        message:
+          "Status updated.",
+        [responseKey]: doc,
+        globalStatus:
+          doc.globalStatus
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message:
+          err.message
+      });
+    }
+  }
+);
+
 app.listen(
   PORT,
-  () => {
+  async () => {
+    await syncSeedAccounts();
+
     console.log(
       "================================="
     );

@@ -337,7 +337,7 @@
 
     justify-content:center;
 
-    transform:translateY(-135px);
+    transform:translateY(-179px);
 
 }
 
@@ -416,7 +416,7 @@
 
     padding:18px 20px;
 
-    margin-top:-125px;
+    margin-top:-150px;
 
     color:#4F2E19;
 
@@ -566,7 +566,9 @@
 
     align-items:flex-start;
 
-    padding-top:15px;
+    padding-top:0;
+
+    transform:translateY(25px);
 
 }
 
@@ -587,7 +589,7 @@
 
     border-radius:28px;
 
-    padding:32px;
+    padding:28px 32px;
 
     box-sizing:border-box;
 
@@ -610,7 +612,7 @@
 
         opacity:0;
 
-        transform:translateY(15px);
+        transform:translateY(12px);
 
     }
 
@@ -1122,32 +1124,42 @@
 
     .fpa3-header{
 
-        flex-wrap:wrap;
+        display:grid;
 
-        gap:10px;
+        grid-template-columns:auto minmax(0,1fr) auto;
+
+        align-items:center;
+
+        justify-content:stretch;
+
+        gap:8px;
 
     }
 
 
     .fpa3-title-area{
 
-        order:1;
+        flex:none;
 
-        width:100%;
+        text-align:center;
+
+        min-width:0;
+
+        width:auto;
 
     }
 
 
     .fpa3-back-button{
 
-        order:2;
+        flex:0 0 auto;
 
     }
 
 
     .fpa3-skip-button{
 
-        order:3;
+        flex:0 0 auto;
 
     }
 
@@ -1161,9 +1173,9 @@
 
     .fpa3-title-strip{
 
-        font-size:16px;
+        font-size:17px;
 
-        padding:8px 16px;
+        padding:8px 18px;
 
     }
 
@@ -1173,6 +1185,8 @@
         font-size:16px;
 
         padding:7px 18px;
+
+        margin:7px auto 10px;
 
     }
 
@@ -1190,18 +1204,18 @@
 
     .fpa3-teacher-section{
 
-        order:1;
+        height:auto;
 
     }
 
 
     .fpa3-teacher-image-wrapper{
 
-        height:230px;
+        height:210px;
 
         width:100%;
 
-        margin-top:-8px;
+        margin-top:0;
 
         transform:none;
 
@@ -1227,7 +1241,7 @@
 
         padding:14px 17px;
 
-        margin-top:-3px;
+        margin-top:0;
 
     }
 
@@ -1247,8 +1261,6 @@
 
 
     .fpa3-question-section{
-
-        order:2;
 
         padding-top:0;
 
@@ -1414,6 +1426,132 @@
     }
 
 }
+
+
+/* =====================================================
+        EXTRA SMALL MOBILE (320px)
+===================================================== */
+
+@media(max-width:320px){
+
+    .favourite-place-activity3-page{
+
+        padding:8px;
+
+    }
+
+
+    .favourite-place-activity3-card{
+
+        padding:12px;
+
+        border-radius:18px;
+
+    }
+
+
+    .fpa3-title-area h1{
+
+        font-size:26px;
+
+    }
+
+
+    .fpa3-title-strip{
+
+        font-size:13px;
+
+        padding:6px 12px;
+
+        white-space:normal;
+
+        word-break:break-word;
+
+    }
+
+
+    .fpa3-back-button,
+    .fpa3-skip-button{
+
+        padding:8px 14px;
+
+        font-size:13px;
+
+    }
+
+
+    .fpa3-progress{
+
+        font-size:14px;
+
+        padding:5px 14px;
+
+    }
+
+
+    .fpa3-teacher-image{
+
+        width:140px;
+
+        max-height:180px;
+
+    }
+
+
+    .fpa3-teacher-bubble{
+
+        width:95%;
+
+        padding:12px 14px;
+
+        font-size:14px;
+
+    }
+
+
+    .fpa3-question-card{
+
+        padding:14px 10px;
+
+    }
+
+
+    .fpa3-question-card h2{
+
+        font-size:22px;
+
+    }
+
+
+    .fpa3-hint{
+
+        font-size:14px;
+
+        padding:12px;
+
+    }
+
+
+    .fpa3-answer-box{
+
+        min-height:105px;
+
+        font-size:15px;
+
+    }
+
+
+    .fpa3-mic-button,
+    .fpa3-submit-button{
+
+        font-size:15px;
+
+        padding:12px 14px;
+
+    }
+
+}
+
 
 /* =========================================
    HEADER MUST STAY ABOVE ALL CONTENT

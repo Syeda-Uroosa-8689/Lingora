@@ -330,3 +330,34 @@
     }
 
 }
+
+
+/* ===================================
+            EXTREME MOBILE (320px)
+=================================== */
+
+@media (max-width: 320px) {
+
+    .favourite-person-intro-popup {
+
+        min-height: 300px;
+
+        padding: 30px 15px;
+
+    }
+
+
+    .favourite-person-intro-popup h1 {
+
+        font-size: 24px;
+
+    }
+
+
+    .favourite-person-intro-popup p {
+
+        font-size: 13px;
+
+    }
+
+}

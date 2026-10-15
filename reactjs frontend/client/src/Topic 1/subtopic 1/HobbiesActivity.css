@@ -4,7 +4,7 @@
 
 .hobbies-activity-page {
     width: 100%;
-    min-height: 100vh;
+    min-height: 100dvh;
 
     background-size: cover;
     background-position: center;
@@ -40,7 +40,7 @@
 .hobbies-activity-card {
     width: min(1400px, 94vw);
     min-height: 760px;
-    max-height: 90vh;
+    max-height: 90dvh;
 
     background-image:
         url("../../assets/favourite.jpeg");
@@ -857,6 +857,8 @@
         max-width: 700px;
 
         width: 100%;
+
+        transform: none;
     }
 
 }
@@ -876,6 +878,10 @@
 
         min-height: 95vh;
 
+        max-height: none;
+
+        overflow: visible;
+
         padding: 18px;
 
         border-radius: 22px;
@@ -884,24 +890,36 @@
 
     .hobbies-activity-header {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            auto minmax(0, 1fr) auto;
 
-        gap: 10px;
+        gap: 12px;
+    }
+
+
+    .hobbies-back-btn {
+
+        width: 100px;
+
+        height: 42px;
+
+        font-size: 14px;
+    }
+
+
+    .hobbies-skip-btn {
+
+        width: 95px;
+
+        height: 42px;
+
+        font-size: 14px;
     }
 
 
     .hobbies-activity-header h1 {
 
-        order: -1;
-
-        font-size: 27px;
-    }
-
-
-    .hobbies-back-btn,
-    .hobbies-skip-btn {
-
-        width: 100%;
+        font-size: 25px;
     }
 
 
@@ -910,6 +928,8 @@
         grid-template-columns: 1fr;
 
         gap: 20px;
+
+        overflow: visible;
     }
 
 
@@ -923,9 +943,9 @@
 
     .teacher-speech-bubble {
 
-        width: 90%;
+        width: 100%;
 
-        max-width: 320px;
+        max-width: 340px;
     }
 
 
@@ -948,4 +968,97 @@
         min-height: 58px;
     }
 
+
+    @media(max-width:480px) {
+
+        .hobbies-activity-page {
+
+            padding: 8px;
+        }
+
+
+        .hobbies-activity-card {
+
+            width: 100vw;
+
+            padding: 14px;
+
+            border-radius: 18px;
+        }
+
+
+        .hobbies-activity-header {
+
+            gap: 8px;
+        }
+
+
+        .hobbies-back-btn,
+        .hobbies-skip-btn {
+
+            width: 90px;
+
+            height: 40px;
+
+            font-size: 13px;
+        }
+
+
+        .hobbies-activity-header h1 {
+
+            font-size: 22px;
+        }
+
+
+        .hobbies-progress {
+
+            width: 180px;
+        }
+
+
+        .hobbies-situation-box {
+
+            padding: 14px 16px;
+        }
+
+
+        .hobbies-situation-box p {
+
+            font-size: 16px;
+        }
+
+
+        .hobbies-option {
+
+            font-size: 14px;
+
+            padding: 10px 14px;
+        }
+
+
+        @media(max-width:320px) {
+
+            .hobbies-activity-card {
+
+                padding: 10px;
+            }
+
+
+            .hobbies-back-btn,
+            .hobbies-skip-btn {
+
+                width: 80px;
+
+                height: 38px;
+
+                font-size: 12px;
+            }
+
+
+            .hobbies-activity-header h1 {
+
+                font-size: 20px;
+            }
+        }
+    }
 }

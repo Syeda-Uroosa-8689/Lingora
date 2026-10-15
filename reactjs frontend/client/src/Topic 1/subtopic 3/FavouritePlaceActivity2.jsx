@@ -1129,12 +1129,12 @@ function FavouritePlaceActivity2({
                 ================================================= */}
 
                 <div
-                    className="fp2-activity-header"
+                    className="fp2a-activity-header"
                 >
 
                     <button
                         type="button"
-                        className="fp2-back-button"
+                        className="fp2a-back-button"
                         onClick={handleBack}
                     >
                         ← Back
@@ -1142,7 +1142,7 @@ function FavouritePlaceActivity2({
 
 
                     <div
-                        className="fp2-title-area"
+                        className="fp2a-title-area"
                     >
 
                         <h1>
@@ -1151,7 +1151,7 @@ function FavouritePlaceActivity2({
 
 
                         <div
-                            className="fp2-title-strip"
+                            className="fp2a-title-strip"
                         >
                             Explore Your Favourite Place
                         </div>
@@ -1161,7 +1161,7 @@ function FavouritePlaceActivity2({
 
                     <button
                         type="button"
-                        className="fp2-skip-button"
+                        className="fp2a-skip-button"
                         onClick={handleSkip}
                         disabled={isProcessing}
                     >
@@ -1176,7 +1176,7 @@ function FavouritePlaceActivity2({
                 ================================================= */}
 
                 <div
-                    className="fp2-progress"
+                    className="fp2a-progress"
                 >
 
                     Round {currentRound + 1}
@@ -1191,7 +1191,7 @@ function FavouritePlaceActivity2({
                 ================================================= */}
 
                 <div
-                    className="fp2-main-content"
+                    className="fp2a-main-content"
                 >
 
                     {/* =================================================
@@ -1199,11 +1199,11 @@ function FavouritePlaceActivity2({
                     ================================================= */}
 
                     <div
-                        className="fp2-teacher-section"
+                        className="fp2a-teacher-section"
                     >
 
                         <div
-                            className="fp2-teacher-image-wrapper"
+                            className="fp2a-teacher-image-wrapper"
                         >
 
                             <img
@@ -1211,8 +1211,8 @@ function FavouritePlaceActivity2({
                                 alt="Teacher"
                                 className={
                                     isSpeaking
-                                        ? "fp2-teacher-image speaking"
-                                        : "fp2-teacher-image"
+                                        ? "fp2a-teacher-image speaking"
+                                        : "fp2a-teacher-image"
                                 }
                             />
 
@@ -1222,12 +1222,12 @@ function FavouritePlaceActivity2({
                         <div
                             className={
                                 feedback
-                                    ? `fp2-teacher-bubble ${
+                                    ? `fp2a-teacher-bubble ${
                                         isCorrect
                                             ? "success"
                                             : "try-again"
                                     }`
-                                    : "fp2-teacher-bubble"
+                                    : "fp2a-teacher-bubble"
                             }
                         >
 
@@ -1266,11 +1266,11 @@ function FavouritePlaceActivity2({
                     ================================================= */}
 
                     <div
-                        className="fp2-question-section"
+                        className="fp2a-question-section"
                     >
 
                         <div
-                            className="fp2-question-card"
+                            className="fp2a-question-card"
                         >
 
                             <h2>
@@ -1289,7 +1289,7 @@ function FavouritePlaceActivity2({
                             ================================================= */}
 
                             <div
-                                className="fp2-clue"
+                                className="fp2a-clue"
                             >
 
                                 <span>
@@ -1308,7 +1308,7 @@ function FavouritePlaceActivity2({
                             ================================================= */}
 
                             <div
-                                className="fp2-options"
+                                className="fp2a-options"
                             >
 
                                 {options.map(
@@ -1323,7 +1323,7 @@ function FavouritePlaceActivity2({
 
 
                                         let optionClass =
-                                            "fp2-option";
+                                            "fp2a-option";
 
 
                                         if (
@@ -1369,7 +1369,7 @@ function FavouritePlaceActivity2({
                                             >
 
                                                 <span
-                                                    className="fp2-option-icon"
+                                                    className="fp2a-option-icon"
                                                 >
 
                                                     {getPlaceIcon(
@@ -1380,7 +1380,7 @@ function FavouritePlaceActivity2({
 
 
                                                 <span
-                                                    className="fp2-option-letter"
+                                                    className="fp2a-option-letter"
                                                 >
 
                                                     {
@@ -1394,7 +1394,7 @@ function FavouritePlaceActivity2({
 
 
                                                 <span
-                                                    className="fp2-option-text"
+                                                    className="fp2a-option-text"
                                                 >
 
                                                     {

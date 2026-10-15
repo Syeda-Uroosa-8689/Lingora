@@ -286,7 +286,7 @@ function PhysicalAppearanceActivity3({
 
             const utterance =
                 new SpeechSynthesisUtterance(
-                    text
+                    text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
                 );
 
             utterance.lang =

@@ -15,6 +15,7 @@
 
     width: 100%;
     height: 100vh;
+    min-height: 100dvh;
 
     background: url("../../assets/chatbg.jpeg")
         center center / cover no-repeat;
@@ -64,6 +65,7 @@
     max-width: 1450px;
 
     height: 90vh;
+    max-height: calc(100dvh - 40px);
 
     background-image: url("../../assets/favourite.jpeg");
 
@@ -828,7 +830,8 @@
 
         width: 95%;
 
-        height: 94vh;
+        height: 94dvh;
+        min-height: 94dvh;
 
         padding: 25px;
     }
@@ -878,7 +881,8 @@
 
         width: 96%;
 
-        height: 96vh;
+        height: 96dvh;
+        min-height: 96dvh;
 
         border-radius: 25px;
 

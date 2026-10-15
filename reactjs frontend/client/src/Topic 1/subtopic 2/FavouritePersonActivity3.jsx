@@ -106,6 +106,15 @@ function FavouritePersonActivity3({
   const [feedback, setFeedback] =
     useState("");
 
+  const [isCorrect, setIsCorrect] =
+    useState(false);
+
+  const [isChecking, setIsChecking] =
+    useState(false);
+
+  const [answerChecked, setAnswerChecked] =
+    useState(false);
+
   /* =====================================================
       REFS
   ===================================================== */
@@ -113,10 +122,10 @@ function FavouritePersonActivity3({
   const recognitionRef =
     useRef(null);
 
-  const mountedRef =
-    useRef(true);
+   const mountedRef =
+     useRef(true);
 
-  /* =====================================================
+   /* =====================================================
       CURRENT TEACHER
   ===================================================== */
 
@@ -287,6 +296,8 @@ function FavouritePersonActivity3({
     setSpokenAnswer("");
     setFeedback("");
     setShowResult(false);
+    setAnswerChecked(false);
+    setIsCorrect(false);
 
     setTimeout(() => {
       speakTeacher(
@@ -356,39 +367,38 @@ function FavouritePersonActivity3({
     };
 
     recognition.onresult = (event) => {
+      if (
+        answerChecked ||
+        isChecking
+      ) {
+        return;
+      }
+
       const text =
         event.results?.[0]?.[0]
           ?.transcript
           ?.trim() || "";
 
-      if (!text) {
+      if (!mountedRef.current) {
         return;
       }
 
-      if (!mountedRef.current) {
+      if (
+        !text ||
+        !text.trim()
+      ) {
+        setFeedback(
+          "I couldn't hear you. Please try again. 🎙️"
+        );
+        setShowResult(true);
         return;
       }
 
       setSpokenAnswer(text);
       setIsListening(false);
+      setShowResult(false);
 
-      setFeedback(
-        "Wonderful speaking! 💗"
-      );
-
-      setShowResult(true);
-
-      speakTeacher(
-        "Wonderful speaking! Great job!"
-      );
-
-      setTimeout(() => {
-        if (!mountedRef.current) {
-          return;
-        }
-
-        handleAutomaticNext();
-      }, 1800);
+      void checkAnswerWithAI(text);
     };
 
     recognition.onerror = (event) => {
@@ -446,6 +456,150 @@ function FavouritePersonActivity3({
   };
 
   /* =====================================================
+      CHECK ANSWER WITH BACKEND
+  ===================================================== */
+
+  const checkAnswerWithAI = async (answerText) => {
+    if (
+      !answerText ||
+      !answerText.trim()
+    ) {
+      setFeedback(
+        "I didn't catch that. Please try speaking again. 🎙️"
+      );
+      setShowResult(true);
+      return;
+    }
+
+    if (!currentCard) {
+      return;
+    }
+
+    setIsChecking(true);
+    setAnswerChecked(true);
+    setShowResult(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/favourite-person/activity3/check-answer`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            cardTitle: currentCard.title,
+            question: currentCard.question,
+            studentAnswer: answerText.trim(),
+            topicId: topicId || 1,
+            lessonId: lessonId || 2,
+            userName: userName || "Student",
+          }),
+        }
+      );
+
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          "Server returned an invalid response."
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+          "Unable to check your answer."
+        );
+      }
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      const correct = Boolean(data?.isCorrect);
+
+      if (correct) {
+        setIsCorrect(true);
+
+        const feedbackText = data?.feedback || "Excellent!";
+
+        setFeedback(feedbackText);
+
+        await speakTeacher(feedbackText);
+      } else {
+        setIsCorrect(false);
+
+        const feedbackText =
+          data?.feedback || "Good try!";
+
+        const correctionText =
+          data?.correction || "";
+
+        const explanationText =
+          data?.explanation || "";
+
+        let teacherResponse = feedbackText;
+
+        if (correctionText) {
+          teacherResponse +=
+            ` You said: ${answerText.trim()}. Correct sentence: ${correctionText}.`;
+        }
+
+        if (explanationText) {
+          teacherResponse += ` ${explanationText}`;
+        }
+
+        setFeedback(teacherResponse);
+
+        await speakTeacher(teacherResponse);
+      }
+    } catch (error) {
+      console.log(
+        "Favourite Person Activity 3 Check Error:",
+        error
+      );
+
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setIsCorrect(false);
+
+      setFeedback(
+        "Sorry! I could not check your answer right now. Please try again."
+      );
+
+      setShowResult(true);
+    } finally {
+      if (mountedRef.current) {
+        setIsChecking(false);
+      }
+    }
+  };
+
+  /* =====================================================
+      CONTINUE TO NEXT CARD
+      (shown after feedback is displayed)
+  ===================================================== */
+
+  const handleContinue = () => {
+    if (
+      isChecking ||
+      !answerChecked
+    ) {
+      return;
+    }
+
+    window.speechSynthesis?.cancel();
+
+    handleAutomaticNext();
+  };
+
+  /* =====================================================
       AUTOMATIC NEXT CARD
   ===================================================== */
 
@@ -462,6 +616,12 @@ function FavouritePersonActivity3({
     ];
 
     setCompletedCards(updatedCompleted);
+    setCurrentCard(null);
+    setSpokenAnswer("");
+    setFeedback("");
+    setShowResult(false);
+    setAnswerChecked(false);
+    setIsCorrect(false);
 
     /* =========================================
         ALL CARDS COMPLETED
@@ -472,11 +632,6 @@ function FavouritePersonActivity3({
       updatedCompleted.length ===
       memoryCards.length
     ) {
-      setCurrentCard(null);
-      setSpokenAnswer("");
-      setFeedback("");
-      setShowResult(false);
-
       setTimeout(() => {
         if (!mountedRef.current) {
           return;
@@ -490,15 +645,6 @@ function FavouritePersonActivity3({
 
       return;
     }
-
-    /* =========================================
-        NEXT CARD
-    ========================================= */
-
-    setCurrentCard(null);
-    setSpokenAnswer("");
-    setFeedback("");
-    setShowResult(false);
 
     setTimeout(() => {
       if (!mountedRef.current) {
@@ -521,6 +667,8 @@ function FavouritePersonActivity3({
     setSpokenAnswer("");
     setFeedback("");
     setShowResult(false);
+    setAnswerChecked(false);
+    setIsCorrect(false);
 
     setTimeout(() => {
       if (currentCard?.question) {
@@ -836,56 +984,72 @@ function FavouritePersonActivity3({
                   </div>
                 )}
 
-                {/* =================================
-                    SUCCESS / RESULT
-                ================================= */}
+                 {/* =================================
+                     RESULT / FEEDBACK
+                 ================================= */}
 
-                {showResult && (
-                  <div className="fp3-success-box">
+                 {showResult && (
+                   <div
+                     className={`fp3-success-box ${
+                       isCorrect
+                         ? "correct"
+                         : "incorrect"
+                     }`}
+                   >
 
-                    <div className="fp3-success-icon">
-                      {spokenAnswer
-                        ? "✓"
-                        : "!"}
-                    </div>
+                     <div className="fp3-success-row">
 
-                    <div>
+                       <div className="fp3-success-icon">
+                         {isCorrect
+                           ? "✅"
+                           : "❌"}
+                       </div>
 
-                      <strong>
-                        {spokenAnswer
-                          ? "Great Speaking! 🎉"
-                          : "Try Again!"}
-                      </strong>
+                       <div>
 
-                      <p>
-                        {feedback}
-                      </p>
+                         <strong>
+                           {isCorrect
+                             ? "Correct! 🎉"
+                             : "Not quite!"}
+                         </strong>
 
-                      {spokenAnswer && (
-                        <small>
-                          Moving to the next card...
-                        </small>
-                      )}
+                         <p>
+                           {feedback}
+                         </p>
 
-                    </div>
+                       </div>
 
-                  </div>
-                )}
+                     </div>
 
-                {/* =================================
-                    TRY AGAIN
-                ================================= */}
+                     {answerChecked &&
+                       !isChecking && (
+                       <button
+                         type="button"
+                         className="fp3-continue-button"
+                         onClick={handleContinue}
+                       >
+                         Continue →
+                       </button>
+                     )}
 
-                {showResult &&
-                  !spokenAnswer && (
-                    <button
-                      type="button"
-                      className="fp3-try-button"
-                      onClick={handleTryAgain}
-                    >
-                      🎙️ Try Again
-                    </button>
-                  )}
+                   </div>
+                 )}
+
+                 {/* =================================
+                     TRY AGAIN (no answer)
+                 ================================= */}
+
+                 {showResult &&
+                   !answerChecked &&
+                   !spokenAnswer && (
+                     <button
+                       type="button"
+                       className="fp3-try-button"
+                       onClick={handleTryAgain}
+                     >
+                       🎙️ Try Again
+                     </button>
+                   )}
 
               </div>
 

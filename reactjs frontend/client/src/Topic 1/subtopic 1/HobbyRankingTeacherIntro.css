@@ -437,3 +437,86 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .hobby-ranking-teacher-intro-card {
+
+        width: 95%;
+
+        min-height: auto;
+
+        padding: 20px;
+
+    }
+
+
+    .hobby-ranking-teacher-image {
+
+        width: 185px;
+
+        height: 185px;
+
+    }
+
+
+    .hobby-ranking-teacher-speech-bubble {
+
+        min-height: 190px;
+
+        padding: 20px 24px;
+
+    }
+
+
+    .hobby-ranking-teacher-name {
+
+        font-size: 17px;
+
+    }
+
+
+    .hobby-ranking-teacher-speech-bubble p {
+
+        font-size: 16px;
+
+    }
+
+}
+
+
+@media (max-width: 320px) {
+
+    .hobby-ranking-teacher-intro-card {
+
+        padding: 15px;
+
+    }
+
+
+    .hobby-ranking-teacher-image {
+
+        width: 165px;
+
+        height: 165px;
+
+    }
+
+
+    .hobby-ranking-teacher-speech-bubble {
+
+        min-height: 170px;
+
+        padding: 16px 20px;
+
+    }
+
+
+    .hobby-ranking-teacher-speech-bubble p {
+
+        font-size: 14px;
+
+    }
+
+}

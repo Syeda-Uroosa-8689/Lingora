@@ -16,19 +16,26 @@
 .physical-appearance-activity1-page {
 
     width: 100%;
+
     min-height: 100vh;
 
     background-size: cover;
+
     background-position: center;
+
     background-repeat: no-repeat;
 
     display: flex;
+
     justify-content: center;
+
     align-items: center;
 
     position: relative;
 
     padding: 24px;
+
+    overflow-x: hidden;
 
 }
 
@@ -60,8 +67,6 @@
 
     min-height: 720px;
 
-    max-height: 92vh;
-
     background-image:
         url("../../assets/partner.jpeg");
 
@@ -87,6 +92,31 @@
         0 20px 60px rgba(0, 0, 0, 0.25);
 
     overflow: hidden;
+
+}
+
+
+/* =====================================================
+    MOBILE: Allow card to grow naturally and scroll page
+    ===================================================== */
+
+@media (max-width: 768px) {
+
+    .physical-appearance-activity1-page {
+
+        align-items: flex-start;
+
+        padding: 16px;
+
+    }
+
+    .physical-appearance-activity1-card {
+
+        max-height: none;
+
+        overflow: visible;
+
+    }
 
 }
 
@@ -989,7 +1019,9 @@
 
         gap: 20px;
 
-        overflow-y: auto;
+        min-height: 0;
+
+        overflow: visible;
 
     }
 
@@ -1003,6 +1035,13 @@
         align-items: center;
 
         gap: 18px;
+
+    }
+
+
+    .physical-appearance-main-section {
+
+        justify-content: flex-start;
 
     }
 
@@ -1122,56 +1161,16 @@
     .physical-appearance-activity1-header {
 
         grid-template-columns:
-            1fr 1fr;
+            auto minmax(0, 1fr) auto;
 
-        grid-template-rows:
-            auto auto;
+        gap: 10px;
 
     }
 
 
     .physical-appearance-header-center {
 
-        grid-column:
-            1 / 3;
-
-        grid-row: 1;
-
-        order: 1;
-
-    }
-
-
-    .physical-appearance-header-left {
-
-        grid-column: 1;
-
-        grid-row: 2;
-
-        order: 2;
-
-    }
-
-
-    .physical-appearance-header-right {
-
-        grid-column: 2;
-
-        grid-row: 2;
-
-        order: 3;
-
-    }
-
-
-    .physical-appearance-back-btn,
-    .physical-appearance-skip-btn {
-
-        width: 100%;
-
-        height: 42px;
-
-        font-size: 14px;
+        text-align: center;
 
     }
 
@@ -1190,10 +1189,29 @@
     }
 
 
+    .physical-appearance-back-btn,
+    .physical-appearance-skip-btn {
+
+        width: 100px;
+
+        height: 42px;
+
+        font-size: 14px;
+
+    }
+
+
     .physical-appearance-activity-content {
 
         padding:
             12px 0 5px;
+
+    }
+
+
+    .physical-appearance-main-section {
+
+        justify-content: flex-start;
 
     }
 
@@ -1203,6 +1221,8 @@
         flex-direction: column;
 
         gap: 8px;
+
+        align-items: center;
 
     }
 
@@ -1298,6 +1318,117 @@
     .physical-appearance-next-button {
 
         width: 180px;
+
+    }
+
+    .physical-appearance-main-section {
+
+        padding-bottom: 20px;
+
+    }
+
+}
+
+
+/* =====================================================
+    SMALL MOBILE
+    ===================================================== */
+
+@media (max-width: 480px) {
+
+    .physical-appearance-activity1-card {
+
+        padding: 14px;
+
+    }
+
+    .physical-appearance-back-btn,
+    .physical-appearance-skip-btn {
+
+        width: 90px;
+
+        height: 40px;
+
+        font-size: 13px;
+
+    }
+
+    .physical-appearance-header-center h1 {
+
+        font-size: 21px;
+
+    }
+
+    .physical-appearance-header-center span {
+
+        font-size: 11px;
+
+    }
+
+    .physical-appearance-question-card {
+
+        padding:
+            14px 12px;
+
+        margin-bottom: 12px;
+
+    }
+
+    .physical-appearance-question-card h2 {
+
+        font-size: 19px;
+
+    }
+
+    .physical-appearance-teacher-img {
+
+        width: 120px;
+
+        max-height: 165px;
+
+    }
+
+    .physical-appearance-teacher-bubble {
+
+        width: 95%;
+
+        max-width: 310px;
+
+    }
+
+    .physical-appearance-character-grid {
+
+        gap: 8px;
+
+    }
+
+    .physical-appearance-character-card {
+
+        padding: 6px;
+
+        border-radius: 13px;
+
+    }
+
+    .physical-appearance-character-picture {
+
+        height: 130px;
+
+        border-radius: 10px;
+
+    }
+
+    .physical-appearance-character-name {
+
+        font-size: 13px;
+
+        padding-top: 6px;
+
+    }
+
+    .physical-appearance-next-button {
+
+        width: 170px;
 
     }
 

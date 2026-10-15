@@ -173,3 +173,30 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .hobbies-popup {
+
+        width: 95%;
+
+        height: 230px;
+
+    }
+
+
+    .hobbies-intro-icon {
+
+        font-size: 38px;
+
+    }
+
+
+    .hobbies-popup h1 {
+
+        font-size: 28px;
+
+    }
+
+}

@@ -1303,10 +1303,14 @@
 ===================================================== */
 
 @media (max-width: 850px) {
-
     .trait-detective-activity1-page {
 
         padding: 14px;
+
+        overflow-y: auto;
+
+        min-height: 100vh;
+
     }
 
 
@@ -1314,14 +1318,18 @@
 
         width: 96vw;
 
-        min-height: 94vh;
+        min-height: auto;
+
+        max-height: none;
 
         padding:
             20px;
 
         border-radius: 24px;
-    }
 
+        overflow: visible;
+
+    }
 
     .trait-detective-activity1-header {
 

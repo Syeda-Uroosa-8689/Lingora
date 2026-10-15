@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-
+ 
 import HomePage from "./homepage";
 import LoginPage from "./LoginPage";
+import AdminDashboard from "./AdminDashboard";
+import SuperAdminDashboard from "./SuperAdminDashboard";
+import TeacherDashboard from "./TeacherDashboard";
 import PathwayPage from "./pathwaypage";
 import TopicPage from "./TopicPage";
 import SubtopicPage from "./SubtopicPage";
@@ -176,24 +179,87 @@ function App() {
                 LOGIN PAGE
             ========================================= */}
 
-            {currentPage === "login" && (
+              {currentPage === "login" && (
 
-                <LoginPage
+                 <LoginPage
 
-                    onLogin={() =>
-                        setCurrentPage("pathway")
-                    }
+                     onLogin={() =>
+                         setCurrentPage("pathway")
+                     }
 
-                    onBack={() =>
-                        setCurrentPage("home")
-                    }
+                     onBack={() =>
+                         setCurrentPage("home")
+                     }
 
-                />
+                     onAdmin={() =>
+                         setCurrentPage("admin")
+                     }
 
-            )}
+                     onTeacher={() =>
+                        setCurrentPage("teacher")
+                     }
+
+                     onSuperAdmin={() =>
+                         setCurrentPage("superadmin")
+                     }
+
+                 />
+
+             )}
 
 
-            {/* =========================================
+             {/* =========================================
+                 ADMIN PANEL
+             ========================================= */}
+
+             {currentPage === "admin" && (
+
+                  <AdminDashboard
+
+                     onBack={() =>
+                         setCurrentPage("login")
+                     }
+
+                 />
+
+             )}
+
+
+             {/* =========================================
+                 TEACHER DASHBOARD
+             ========================================= */}
+
+             {currentPage === "teacher" && (
+
+                  <TeacherDashboard
+
+                     onBack={() =>
+                         setCurrentPage("login")
+                     }
+
+                 />
+
+              )}
+
+
+             {/* =========================================
+                  SUPER ADMIN DASHBOARD
+             ========================================= */}
+
+             {currentPage === "superadmin" && (
+
+                   <SuperAdminDashboard
+
+                      onBack={() =>
+                          setCurrentPage("login")
+                      }
+
+                  />
+
+             )}
+
+
+             {/* =========================================
                 PATHWAY PAGE
             ========================================= */}
 

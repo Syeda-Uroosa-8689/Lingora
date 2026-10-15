@@ -1,173 +1,169 @@
 /* ===================================
-      FAVOURITE PLACE ACTIVITY 3 INTRO
+   FAVOURITE PLACE ACTIVITY 3 INTRO
 =================================== */
 
-.favourite-place-activity3-intro-container{
+.favourite-place-intro-container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 
-    position:fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    inset:0;
-
-    z-index:9999;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background-image:url("../../assets/chatbg.jpeg");
-
-    background-size:cover;
-
-    background-position:center;
-
-    background-repeat:no-repeat;
-
+  background-image: url("../../assets/chatbg.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 
 /* ===================================
-      DARK OVERLAY
+   DARK BLURRED OVERLAY
 =================================== */
 
-.favourite-place-activity3-intro-container::before{
+.favourite-place-intro-container::before {
+  content: "";
 
-    content:"";
+  position: absolute;
+  inset: 0;
 
-    position:absolute;
+  background: rgba(0, 0, 0, 0.30);
 
-    inset:0;
-
-    background:rgba(0,0,0,.30);
-
-    backdrop-filter:blur(8px);
-
+  backdrop-filter: blur(8px);
 }
 
 
 /* ===================================
-      INTRO POPUP
+   INTRO POPUP
 =================================== */
 
-.favourite-place-activity3-intro-popup{
+.favourite-place-intro-popup {
+  width: 1000px;
+  height: 420px;
 
-    width:1000px;
+  background: #D8B48A;
 
-    height:420px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    background:#D8B48A;
+  position: relative;
+  z-index: 2;
 
-    display:flex;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.30);
 
-    flex-direction:column;
+  clip-path: polygon(
+    8% 0%,
+    92% 0%,
+    100% 18%,
+    100% 82%,
+    92% 100%,
+    8% 100%,
+    0% 82%,
+    0% 18%
+  );
 
-    justify-content:center;
+  transform: scale(0.5);
+  opacity: 0;
 
-    align-items:center;
-
-    position:relative;
-
-    z-index:2;
-
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.30);
-
-    clip-path:polygon(
-        8% 0%,
-        92% 0%,
-        100% 18%,
-        100% 82%,
-        92% 100%,
-        8% 100%,
-        0% 82%,
-        0% 18%
-    );
-
-    transform:scale(.5);
-
-    opacity:0;
-
-    transition:.5s ease;
-
+  transition: 0.5s ease;
 }
 
 
 /* ===================================
-      SHOW ANIMATION
+   POPUP SHOW ANIMATION
 =================================== */
 
-.favourite-place-activity3-intro-popup.show{
-
-    transform:scale(1);
-
-    opacity:1;
-
+.favourite-place-intro-popup.show {
+  transform: scale(1);
+  opacity: 1;
 }
 
 
 /* ===================================
-      ICON
+   TITLE
 =================================== */
 
-.favourite-place-activity3-intro-icon{
+.favourite-place-intro-popup h1 {
+  margin: 0;
 
-    font-size:82px;
+  padding: 0 50px;
 
-    margin-bottom:18px;
+  font-size: 64px;
+  font-weight: 800;
 
+  color: #5A3620;
+
+  letter-spacing: 2px;
+
+  text-align: center;
+
+  line-height: 1.2;
 }
 
 
 /* ===================================
-      TITLE
+   RESPONSIVE
 =================================== */
 
-.favourite-place-activity3-intro-popup h1{
+@media (max-width: 768px) {
 
-    margin:0;
+  .favourite-place-intro-popup {
+    width: 90%;
+    height: 260px;
+  }
 
-    font-size:64px;
-
-    font-weight:800;
-
-    color:#5A3620;
-
-    letter-spacing:2px;
-
-    text-align:center;
+  .favourite-place-intro-popup h1 {
+    font-size: 36px;
+    padding: 0 25px;
+  }
 
 }
 
 
-/* ===================================
-      RESPONSIVE
-=================================== */
+@media (max-width: 480px) {
 
-@media(max-width:768px){
+  .favourite-place-intro-popup {
+    width: 95%;
+    height: 230px;
+  }
 
-    .favourite-place-activity3-intro-popup{
+  .favourite-place-intro-popup h1 {
+    font-size: 30px;
+    padding: 0 20px;
+  }
 
-        width:90%;
-
-        height:260px;
-
-    }
-
-
-    .favourite-place-activity3-intro-icon{
-
-        font-size:48px;
-
-    }
+}
 
 
-    .favourite-place-activity3-intro-popup h1{
+@media (max-width: 360px) {
 
-        font-size:36px;
+  .favourite-place-intro-popup {
+    width: 96%;
+    height: 210px;
+  }
 
-        letter-spacing:1px;
+  .favourite-place-intro-popup h1 {
+    font-size: 26px;
+    padding: 0 15px;
+  }
 
-    }
+}
+
+
+@media (max-width: 320px) {
+
+  .favourite-place-intro-popup {
+    width: 96%;
+    height: 200px;
+  }
+
+  .favourite-place-intro-popup h1 {
+    font-size: 24px;
+    padding: 0 12px;
+    letter-spacing: 1px;
+  }
 
 }

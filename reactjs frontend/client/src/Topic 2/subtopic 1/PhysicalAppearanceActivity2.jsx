@@ -9,6 +9,10 @@ import confetti from "canvas-confetti";
 import "./PhysicalAppearanceActivity2.css";
 
 
+const ACTIVITY2_API =
+`${import.meta.env.VITE_API_URL}/api/physical-appearance/activity2`;
+
+
 /* =========================================================
    ACTIVITY 2 DATA
 ========================================================= */
@@ -413,7 +417,9 @@ function PhysicalAppearanceActivity2({
 
 
         const speech =
-            new SpeechSynthesisUtterance(text);
+            new SpeechSynthesisUtterance(
+                text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+            );
 
 
         speech.lang = "en-US";
@@ -1138,7 +1144,7 @@ function PhysicalAppearanceActivity2({
 
             const response =
                 await fetch(
-                    "/api/physical-appearance/activity2",
+                     ACTIVITY2_API,
                     {
                         method: "POST",
 
@@ -1484,7 +1490,7 @@ function PhysicalAppearanceActivity2({
 
             const response =
                 await fetch(
-                    "/api/physical-appearance/activity2",
+                     ACTIVITY2_API,
                     {
                         method: "POST",
 

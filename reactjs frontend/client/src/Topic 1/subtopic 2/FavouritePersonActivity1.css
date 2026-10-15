@@ -1207,32 +1207,37 @@
 
     .fp-activity-header{
 
-        flex-wrap:wrap;
+        display:grid;
 
-        gap:10px;
+        grid-template-columns:
+            auto minmax(0,1fr) auto;
+
+        align-items:center;
+
+        justify-content:stretch;
+
+        gap:8px;
 
     }
 
 
     .fp-title-area{
 
-        order:1;
-
-        width:100%;
+        text-align:center;
 
     }
 
 
     .fp-back-button{
 
-        order:2;
+        justify-self:start;
 
     }
 
 
     .fp-skip-button{
 
-        order:3;
+        justify-self:end;
 
     }
 
@@ -1279,18 +1284,18 @@
 
         height:auto;
 
-        order:1;
-
     }
 
 
     .fp-teacher-image-wrapper{
 
-        height:230px;
+        height:210px;
 
         width:100%;
 
-        margin-top:-8px;
+        margin-top:0;
+
+        transform:none;
 
     }
 
@@ -1314,7 +1319,7 @@
 
         padding:14px 17px;
 
-        margin-top:-3px;
+        margin-top:0;
 
     }
 
@@ -1335,9 +1340,9 @@
 
     .fp-question-section{
 
-        order:2;
-
         padding-top:0;
+
+        transform:none;
 
     }
 
@@ -1423,7 +1428,7 @@
 
         height:205px;
 
-        margin-top:-10px;
+        margin-top:0;
 
     }
 
@@ -1442,6 +1447,8 @@
         width:95%;
 
         min-height:100px;
+
+        margin-top:0;
 
     }
 
@@ -1485,6 +1492,120 @@
         height:42px;
 
         font-size:20px;
+
+    }
+
+}
+
+
+@media(max-width:320px){
+
+    .fp-title-area h1{
+
+        font-size:34px;
+
+    }
+
+
+    .fp-title-strip{
+
+        font-size:14px;
+
+        padding:6px 14px;
+
+    }
+
+
+    .fp-back-button,
+    .fp-skip-button{
+
+        padding:8px 14px;
+
+        font-size:13px;
+
+    }
+
+
+    .fp-progress{
+
+        font-size:14px;
+
+        padding:6px 14px;
+
+    }
+
+
+    .fp-teacher-image{
+
+        width:160px;
+
+        max-height:200px;
+
+    }
+
+
+    .fp-teacher-bubble{
+
+        min-height:95px;
+
+        padding:12px 14px;
+
+    }
+
+
+    .fp-teacher-bubble strong{
+
+        font-size:18px;
+
+    }
+
+
+    .fp-teacher-bubble p{
+
+        font-size:13px;
+
+    }
+
+
+    .fp-question-card{
+
+        padding:16px 12px;
+
+    }
+
+
+    .fp-question-card h2{
+
+        font-size:23px;
+
+    }
+
+
+    .fp-clue{
+
+        font-size:15px;
+
+        padding:12px;
+
+    }
+
+
+    .fp-option{
+
+        min-height:85px;
+
+        font-size:15px;
+
+    }
+
+
+    .fp-option-letter{
+
+        width:38px;
+
+        height:38px;
+
+        font-size:18px;
 
     }
 

@@ -44,6 +44,7 @@ const SpeechRecognition =
 function PlanItTogetherActivity({
   onBack,
   onFinish,
+  onSkip,
   userName,
 }) {
   /* =====================================================
@@ -103,20 +104,11 @@ function PlanItTogetherActivity({
   ===================================================== */
 
   const recognitionRef = useRef(null);
-
   const requestInProgressRef = useRef(false);
-
   const transitionTimeoutRef = useRef(null);
 
-  /*
-     This ref tells us whether the current recognition session
-     has already produced a real speech result.
-  */
   const speechResultReceivedRef = useRef(false);
 
-  /*
-     Prevents an old recognition event from affecting a new one.
-  */
   const recognitionSessionRef = useRef(0);
 
   /* =====================================================
@@ -258,7 +250,7 @@ function PlanItTogetherActivity({
 
   /* =====================================================
      START ACTIVITY
-     
+
      LET'S GO → CHARACTER SELECTION
   ===================================================== */
 
@@ -279,11 +271,6 @@ function PlanItTogetherActivity({
 
     recognitionSessionRef.current += 1;
 
-    /*
-       ONLY CHANGE:
-       Instead of directly opening step 1,
-       show character selection first.
-    */
     setStep(9);
 
     setUserText("");
@@ -354,9 +341,6 @@ function PlanItTogetherActivity({
   ===================================================== */
 
   const handleNoSpeech = () => {
-    /*
-       Do not show this if another request is already running.
-    */
     if (requestInProgressRef.current) {
       return;
     }
@@ -380,17 +364,11 @@ function PlanItTogetherActivity({
       return;
     }
 
-    /*
-       If already listening, clicking the mic stops it.
-    */
     if (isListening) {
       stopListening();
       return;
     }
 
-    /*
-       Browser support check.
-    */
     if (!SpeechRecognition) {
       const message =
         "Speech recognition is not supported in this browser. Please use Chrome.";
@@ -403,9 +381,6 @@ function PlanItTogetherActivity({
       return;
     }
 
-    /*
-       Stop any previous recognition instance.
-    */
     if (recognitionRef.current) {
       try {
         recognitionRef.current.onresult = null;
@@ -415,9 +390,6 @@ function PlanItTogetherActivity({
       } catch (error) {}
     }
 
-    /*
-       New recognition session.
-    */
     const sessionId = recognitionSessionRef.current + 1;
 
     recognitionSessionRef.current = sessionId;
@@ -427,26 +399,12 @@ function PlanItTogetherActivity({
     const recognition = new SpeechRecognition();
 
     recognition.lang = "en-US";
-
-    /*
-       One answer at a time.
-    */
     recognition.continuous = false;
-
-    /*
-       We need final speech.
-    */
     recognition.interimResults = false;
-
     recognition.maxAlternatives = 1;
 
-    /*
-       Some browsers behave better when this is explicitly enabled.
-    */
     recognition.onaudiostart = () => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -454,9 +412,7 @@ function PlanItTogetherActivity({
     };
 
     recognition.onsoundstart = () => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -464,9 +420,7 @@ function PlanItTogetherActivity({
     };
 
     recognition.onspeechstart = () => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -474,9 +428,7 @@ function PlanItTogetherActivity({
     };
 
     recognition.onstart = () => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -484,17 +436,12 @@ function PlanItTogetherActivity({
 
       setIsListening(true);
 
-      /*
-         Clear previous answer when a new recording begins.
-      */
       setUserText("");
       setFeedbackType("");
     };
 
     recognition.onresult = (event) => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -506,10 +453,6 @@ function PlanItTogetherActivity({
       let transcript = "";
 
       try {
-        /*
-           Read every final result instead of blindly
-           taking only results[0].
-        */
         for (
           let i = event.resultIndex;
           i < event.results.length;
@@ -527,10 +470,6 @@ function PlanItTogetherActivity({
           }
         }
 
-        /*
-           Fallback for browsers that provide the result
-           but don't mark it as final exactly as expected.
-        */
         if (!transcript.trim()) {
           const firstResult =
             event?.results?.[0]?.[0]?.transcript || "";
@@ -551,26 +490,15 @@ function PlanItTogetherActivity({
         transcript
       );
 
-      /*
-         IMPORTANT:
-         If we actually received speech, remember it.
-         onend must NOT turn this into "couldn't hear you".
-      */
       if (transcript) {
         speechResultReceivedRef.current = true;
 
         setIsListening(false);
 
-        /*
-           Show the child's REAL words.
-        */
         setUserText(transcript);
 
         setFeedbackType("");
 
-        /*
-           Send only the actual spoken answer.
-        */
         handleSpeechAnswer(transcript);
 
         return;
@@ -582,9 +510,7 @@ function PlanItTogetherActivity({
     };
 
     recognition.onerror = (event) => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -596,17 +522,10 @@ function PlanItTogetherActivity({
 
       setIsListening(false);
 
-      /*
-         "aborted" is not a real microphone failure.
-      */
       if (event?.error === "aborted") {
         return;
       }
 
-      /*
-         If a result was already received, don't overwrite
-         the child's actual answer.
-      */
       if (speechResultReceivedRef.current) {
         return;
       }
@@ -682,9 +601,7 @@ function PlanItTogetherActivity({
     };
 
     recognition.onend = () => {
-      if (
-        recognitionSessionRef.current !== sessionId
-      ) {
+      if (recognitionSessionRef.current !== sessionId) {
         return;
       }
 
@@ -697,17 +614,10 @@ function PlanItTogetherActivity({
       );
 
       setIsListening(false);
-
-      /*
-         DO NOT call handleNoSpeech here.
-      */
     };
 
     recognitionRef.current = recognition;
 
-    /*
-       Clear old visible response before recording.
-    */
     setUserText("");
     setTeacherResponse("");
     setFeedbackType("");
@@ -887,10 +797,6 @@ function PlanItTogetherActivity({
       );
     }
 
-    /*
-       COMPLETE
-    */
-
     if (
       backendData.conversationComplete === true
     ) {
@@ -907,10 +813,6 @@ function PlanItTogetherActivity({
 
       return;
     }
-
-    /*
-       NEXT STEP
-    */
 
     const nextFrontendStep =
       getFrontendStepFromBackend(
@@ -1148,11 +1050,6 @@ function PlanItTogetherActivity({
           responseText
         );
 
-        /*
-           WRONG ANSWER:
-           Stay on same step.
-        */
-
         if (
           data.isCorrect !== true
         ) {
@@ -1166,10 +1063,6 @@ function PlanItTogetherActivity({
 
           return;
         }
-
-        /*
-           ACCEPTED
-        */
 
         setFeedbackType(
           "correct"
@@ -1322,6 +1215,8 @@ function PlanItTogetherActivity({
 
   /* =====================================================
      BACK
+     
+     ALWAYS GO TO CALLING PAGE
   ===================================================== */
 
   const handleBack = () => {
@@ -1329,226 +1224,87 @@ function PlanItTogetherActivity({
       return;
     }
 
-    if (isListening) {
-      stopListening();
-    }
-
-    if (
-      transitionTimeoutRef.current
-    ) {
-      clearTimeout(
-        transitionTimeoutRef.current
-      );
-    }
-
-    /*
-       INTRO
-    */
-
-    if (step === 0) {
-      if (onBack) {
-        onBack();
-      }
-
-      return;
-    }
-
-    /*
-       CHARACTER SELECTION
-    */
-
-    if (step === 9) {
-      setStep(0);
-
-      setSelectedCharacter("");
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      return;
-    }
-
-    /*
-       DAY
-    */
-
-    if (step === 1) {
-      setStep(9);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      return;
-    }
-
-    /*
-       ACTIVITY
-    */
-
-    if (step === 2) {
-      setStep(1);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      setTimeout(() => {
-        speakTeacher(
-          "Are you free this Saturday?"
-        );
-      }, 150);
-
-      return;
-    }
-
-    /*
-       TIME SELECTION
-    */
-
-    if (step === 3) {
-      setStep(2);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      setTimeout(() => {
-        speakTeacher(
-          "What would you like to do?"
-        );
-      }, 150);
-
-      return;
-    }
-
-    /*
-       ACTIVITY SELECTION
-    */
-
-    if (step === 4) {
-      setStep(3);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      return;
-    }
-
-    /*
-       TIME SPEAKING
-    */
-
-    if (step === 5) {
-      setStep(4);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      return;
-    }
-
-    /*
-       PLACE
-    */
-
-    if (step === 6) {
-      setStep(5);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      setTimeout(() => {
-        speakTeacher(
-          "What time would you like to meet?"
-        );
-      }, 150);
-
-      return;
-    }
-
-    /*
-       FINAL
-    */
-
-    if (step === 7) {
-      setStep(6);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      setTimeout(() => {
-        speakTeacher(
-          "Where would you like to go?"
-        );
-      }, 150);
-
-      return;
-    }
-
-    /*
-       COMPLETE
-    */
-
-    if (step === 8) {
-      setStep(7);
-
-      setUserText("");
-      setTeacherResponse("");
-      setFeedbackType("");
-
-      setTimeout(() => {
-        speakTeacher(
-          "Is our plan correct?"
-        );
-      }, 150);
-    }
-  };
-
-  /* =====================================================
-     SKIP
-  ===================================================== */
-
-  const handleSkip = () => {
     recognitionSessionRef.current += 1;
 
-    if (
-      recognitionRef.current
-    ) {
+    if (recognitionRef.current) {
       try {
-        recognitionRef.current.onresult =
-          null;
-
-        recognitionRef.current.onerror =
-          null;
-
-        recognitionRef.current.onend =
-          null;
-
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
         recognitionRef.current.stop();
       } catch (error) {}
     }
 
-    if (
-      window.speechSynthesis
-    ) {
+    if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
 
-    if (
-      transitionTimeoutRef.current
-    ) {
+    if (transitionTimeoutRef.current) {
       clearTimeout(
         transitionTimeoutRef.current
       );
     }
 
     setIsListening(false);
+    setIsChecking(false);
+
+    /*
+      BACK ALWAYS CALLS THE PAGE
+      THAT OPENED THIS ACTIVITY.
+    */
+
+    if (onBack) {
+      onBack();
+    }
+  };
+
+  /* =====================================================
+     SKIP
+     
+     ALWAYS GO TO NEXT ACTIVITY INTRO
+  ===================================================== */
+
+  const handleSkip = () => {
+    if (isChecking) {
+      return;
+    }
+
+    recognitionSessionRef.current += 1;
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      } catch (error) {}
+    }
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(
+        transitionTimeoutRef.current
+      );
+    }
+
+    setIsListening(false);
+    setIsChecking(false);
+
+    /*
+      SKIP MUST GO TO NEXT ACTIVITY INTRO.
+    */
+
+    if (onSkip) {
+      onSkip();
+      return;
+    }
+
+    /*
+      Fallback.
+    */
 
     if (onFinish) {
       onFinish();
@@ -1597,6 +1353,7 @@ function PlanItTogetherActivity({
           <div className="plan-top-bar">
 
             <button
+              type="button"
               className="plan-top-btn plan-back-btn"
               onClick={handleBack}
               disabled={isChecking}
@@ -1613,6 +1370,7 @@ function PlanItTogetherActivity({
             </div>
 
             <button
+              type="button"
               className="plan-top-btn plan-skip-btn"
               onClick={handleSkip}
               disabled={isChecking}
@@ -1674,6 +1432,7 @@ function PlanItTogetherActivity({
               </p>
 
               <button
+                type="button"
                 className="lets-go-btn"
                 onClick={startActivity}
               >
@@ -1809,16 +1568,15 @@ function PlanItTogetherActivity({
 
               {/* =================================================
                   SELECTED CHARACTER
-                  
-                  Appears ONLY where child speech appears.
-                  Existing speech bubble remains untouched.
               ================================================= */}
 
               {selectedCharacter &&
-                (step === 2 ||
+                (
+                  step === 2 ||
                   step === 5 ||
                   step === 6 ||
-                  step === 7) && (
+                  step === 7
+                ) && (
                   <div className="selected-child-character">
 
                     <img
@@ -1943,15 +1701,11 @@ function PlanItTogetherActivity({
 
                   </div>
 
-                  {/* DAY */}
-
                   <div className="plan-day">
                     {planDay
                       ? planDay.toUpperCase()
                       : "NOT DECIDED"}
                   </div>
-
-                  {/* PLACE */}
 
                   <div className="plan-info-row">
 
@@ -1974,8 +1728,6 @@ function PlanItTogetherActivity({
 
                   </div>
 
-                  {/* TIME */}
-
                   <div className="plan-info-row">
 
                     <div className="plan-info-icon time-icon">
@@ -1996,8 +1748,6 @@ function PlanItTogetherActivity({
                     </div>
 
                   </div>
-
-                  {/* ACTIVITY */}
 
                   <div className="plan-info-row">
 
@@ -2020,8 +1770,6 @@ function PlanItTogetherActivity({
 
                   </div>
 
-                  {/* PARK IMAGE */}
-
                   {planPlace &&
                     planPlace
                       .toLowerCase()
@@ -2032,9 +1780,7 @@ function PlanItTogetherActivity({
                         alt="Park"
                         className="plan-place-image"
                       />
-                    )}
-
-                  {/* LIBRARY IMAGE */}
+                  )}
 
                   {planPlace &&
                     planPlace
@@ -2046,7 +1792,7 @@ function PlanItTogetherActivity({
                         alt="Library"
                         className="plan-place-image"
                       />
-                    )}
+                  )}
 
                 </div>
               )}
@@ -2080,6 +1826,7 @@ function PlanItTogetherActivity({
                   <div className="time-options">
 
                     <button
+                      type="button"
                       className="time-option"
                       onClick={() =>
                         chooseTime(
@@ -2091,6 +1838,7 @@ function PlanItTogetherActivity({
                     </button>
 
                     <button
+                      type="button"
                       className="time-option"
                       onClick={() =>
                         chooseTime(
@@ -2102,6 +1850,7 @@ function PlanItTogetherActivity({
                     </button>
 
                     <button
+                      type="button"
                       className="time-option"
                       onClick={() =>
                         chooseTime(
@@ -2133,6 +1882,7 @@ function PlanItTogetherActivity({
                     {/* FOOTBALL */}
 
                     <button
+                      type="button"
                       className="activity-option"
                       onClick={() =>
                         chooseActivity(
@@ -2157,6 +1907,7 @@ function PlanItTogetherActivity({
                     {/* LUNCH */}
 
                     <button
+                      type="button"
                       className="activity-option"
                       onClick={() =>
                         chooseActivity(
@@ -2181,6 +1932,7 @@ function PlanItTogetherActivity({
                     {/* WALK */}
 
                     <button
+                      type="button"
                       className="activity-option"
                       onClick={() =>
                         chooseActivity(
@@ -2205,6 +1957,7 @@ function PlanItTogetherActivity({
                     {/* BOOK */}
 
                     <button
+                      type="button"
                       className="activity-option"
                       onClick={() =>
                         chooseActivity(
@@ -2349,6 +2102,7 @@ function PlanItTogetherActivity({
                       progressCount,
                   },
                   (_, index) => (
+
                     <span
                       key={index}
                       className={`progress-dot ${
@@ -2359,6 +2113,7 @@ function PlanItTogetherActivity({
                           : ""
                       }`}
                     ></span>
+
                   )
                 )}
 
@@ -2405,6 +2160,7 @@ function PlanItTogetherActivity({
                 </div>
 
                 <button
+                  type="button"
                   className="finish-btn"
                   onClick={
                     finishActivity

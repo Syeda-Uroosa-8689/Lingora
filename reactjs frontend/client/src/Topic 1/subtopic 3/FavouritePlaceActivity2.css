@@ -123,7 +123,7 @@
         HEADER
 ===================================================== */
 
-.fp2-activity-header {
+.fp2a-activity-header {
 
     display: flex;
 
@@ -140,7 +140,7 @@
 }
 
 
-.fp2-title-area {
+.fp2a-title-area {
 
     text-align: center;
 
@@ -149,7 +149,7 @@
 }
 
 
-.fp2-title-area h1 {
+.fp2a-title-area h1 {
 
     margin: 0;
 
@@ -166,7 +166,7 @@
 }
 
 
-.fp2-title-strip {
+.fp2a-title-strip {
 
     display: inline-block;
 
@@ -194,8 +194,8 @@
         HEADER BUTTONS
 ===================================================== */
 
-.fp2-back-button,
-.fp2-skip-button {
+.fp2a-back-button,
+.fp2a-skip-button {
 
     border: none;
 
@@ -225,8 +225,8 @@
 }
 
 
-.fp2-back-button:hover,
-.fp2-skip-button:hover {
+.fp2a-back-button:hover,
+.fp2a-skip-button:hover {
 
     transform: translateY(-3px);
 
@@ -243,7 +243,7 @@
         PROGRESS
 ===================================================== */
 
-.fp2-progress {
+.fp2a-progress {
 
     width: max-content;
 
@@ -275,7 +275,7 @@
         MAIN CONTENT
 ===================================================== */
 
-.fp2-main-content {
+.fp2a-main-content {
 
     flex: 1;
 
@@ -306,7 +306,7 @@
         TEACHER SECTION
 ===================================================== */
 
-.fp2-teacher-section {
+.fp2a-teacher-section {
 
     display: flex;
 
@@ -327,7 +327,7 @@
         TEACHER IMAGE WRAPPER
 ===================================================== */
 
-.fp2-teacher-image-wrapper {
+.fp2a-teacher-image-wrapper {
 
     width: 270px;
 
@@ -348,7 +348,7 @@
         TEACHER IMAGE
 ===================================================== */
 
-.fp2-teacher-image {
+.fp2a-teacher-image {
 
     width: 260px;
 
@@ -370,7 +370,7 @@
         TEACHER SPEAKING
 ===================================================== */
 
-.fp2-teacher-image.speaking {
+.fp2a-teacher-image.speaking {
 
     animation:
         fp2TeacherTalk .55s
@@ -406,7 +406,7 @@
         TEACHER BUBBLE
 ===================================================== */
 
-.fp2-teacher-bubble {
+.fp2a-teacher-bubble {
 
     position: relative;
 
@@ -439,7 +439,7 @@
 }
 
 
-.fp2-teacher-bubble::before {
+.fp2a-teacher-bubble::before {
 
     content: "";
 
@@ -464,7 +464,7 @@
 }
 
 
-.fp2-teacher-bubble::after {
+.fp2a-teacher-bubble::after {
 
     content: "";
 
@@ -510,7 +510,7 @@
 }
 
 
-.fp2-teacher-bubble strong {
+.fp2a-teacher-bubble strong {
 
     display: block;
 
@@ -523,7 +523,7 @@
 }
 
 
-.fp2-teacher-bubble p {
+.fp2a-teacher-bubble p {
 
     margin: 0;
 
@@ -540,7 +540,7 @@
         SUCCESS BUBBLE
 ===================================================== */
 
-.fp2-teacher-bubble.success {
+.fp2a-teacher-bubble.success {
 
     border-color: #48A868;
 
@@ -549,14 +549,14 @@
 }
 
 
-.fp2-teacher-bubble.success::before {
+.fp2a-teacher-bubble.success::before {
 
     border-bottom-color: #48A868;
 
 }
 
 
-.fp2-teacher-bubble.success strong {
+.fp2a-teacher-bubble.success strong {
 
     color: #258343;
 
@@ -567,7 +567,7 @@
         TRY AGAIN BUBBLE
 ===================================================== */
 
-.fp2-teacher-bubble.try-again {
+.fp2a-teacher-bubble.try-again {
 
     border-color: #D99A45;
 
@@ -576,7 +576,7 @@
 }
 
 
-.fp2-teacher-bubble.try-again::before {
+.fp2a-teacher-bubble.try-again::before {
 
     border-bottom-color: #D99A45;
 
@@ -587,7 +587,7 @@
         QUESTION SECTION
 ===================================================== */
 
-.fp2-question-section {
+.fp2a-question-section {
 
     width: 100%;
 
@@ -608,7 +608,7 @@
         QUESTION CARD
 ===================================================== */
 
-.fp2-question-card {
+.fp2a-question-card {
 
     width: 100%;
 
@@ -664,7 +664,7 @@
         QUESTION TITLE
 ===================================================== */
 
-.fp2-question-card h2 {
+.fp2a-question-card h2 {
 
     margin: 0 0 14px;
 
@@ -683,7 +683,7 @@
         CLUE
 ===================================================== */
 
-.fp2-clue {
+.fp2a-clue {
 
     background: #FFF1DD;
 
@@ -711,7 +711,7 @@
 }
 
 
-.fp2-clue span {
+.fp2a-clue span {
 
     font-weight: 900;
 
@@ -726,7 +726,7 @@
         OPTIONS GRID
 ===================================================== */
 
-.fp2-options {
+.fp2a-options {
 
     display: grid;
 
@@ -742,7 +742,7 @@
         OPTION
 ===================================================== */
 
-.fp2-option {
+.fp2a-option {
 
     position: relative;
 
@@ -782,7 +782,7 @@
 }
 
 
-.fp2-option:hover:not(:disabled) {
+.fp2a-option:hover:not(:disabled) {
 
     transform: translateY(-5px);
 
@@ -796,7 +796,7 @@
 }
 
 
-.fp2-option:disabled {
+.fp2a-option:disabled {
 
     cursor: default;
 
@@ -807,7 +807,7 @@
         OPTION ICON
 ===================================================== */
 
-.fp2-option-icon {
+.fp2a-option-icon {
 
     font-size: 42px;
 
@@ -820,7 +820,7 @@
         OPTION LETTER
 ===================================================== */
 
-.fp2-option-letter {
+.fp2a-option-letter {
 
     width: 38px;
 
@@ -856,7 +856,7 @@
         OPTION TEXT
 ===================================================== */
 
-.fp2-option-text {
+.fp2a-option-text {
 
     text-align: center;
 
@@ -869,7 +869,7 @@
         CORRECT
 ===================================================== */
 
-.fp2-option.correct {
+.fp2a-option.correct {
 
     background: #E7F9E9;
 
@@ -883,7 +883,7 @@
 }
 
 
-.fp2-option.correct .fp2-option-letter {
+.fp2a-option.correct .fp2a-option-letter {
 
     background:
         linear-gradient(
@@ -921,7 +921,7 @@
         WRONG
 ===================================================== */
 
-.fp2-option.wrong {
+.fp2a-option.wrong {
 
     background: #FFE8E8;
 
@@ -1032,7 +1032,7 @@
     }
 
 
-    .fp2-main-content {
+    .fp2a-main-content {
 
         grid-template-columns:
             230px
@@ -1043,7 +1043,7 @@
     }
 
 
-    .fp2-teacher-image-wrapper {
+    .fp2a-teacher-image-wrapper {
 
         width: 220px;
 
@@ -1052,7 +1052,7 @@
     }
 
 
-    .fp2-teacher-image {
+    .fp2a-teacher-image {
 
         width: 210px;
 
@@ -1061,21 +1061,21 @@
     }
 
 
-    .fp2-teacher-bubble {
+    .fp2a-teacher-bubble {
 
         width: 220px;
 
     }
 
 
-    .fp2-question-card {
+    .fp2a-question-card {
 
         padding: 22px;
 
     }
 
 
-    .fp2-options {
+    .fp2a-options {
 
         grid-template-columns:
             1fr;
@@ -1083,7 +1083,7 @@
     }
 
 
-    .fp2-option {
+    .fp2a-option {
 
         min-height: 105px;
 
@@ -1126,46 +1126,56 @@
     }
 
 
-    .fp2-activity-header {
+    .fp2a-activity-header {
 
-        flex-wrap: wrap;
+        display: grid;
 
-        gap: 10px;
+        grid-template-columns: auto minmax(0, 1fr) auto;
 
-    }
+        align-items: center;
 
+        justify-content: stretch;
 
-    .fp2-title-area {
-
-        order: 1;
-
-        width: 100%;
+        gap: 8px;
 
     }
 
 
-    .fp2-back-button {
+    .fp2a-title-area {
 
-        order: 2;
+        flex: none;
+
+        text-align: center;
+
+        min-width: 0;
+
+        width: auto;
 
     }
 
 
-    .fp2-skip-button {
+    .fp2a-back-button {
 
-        order: 3;
+        flex: 0 0 auto;
 
     }
 
 
-    .fp2-title-area h1 {
+    .fp2a-skip-button {
+
+        flex: 0 0 auto;
+
+    }
+
+
+    .fp2a-title-area h1 {
 
         font-size: 38px;
 
     }
 
 
-    .fp2-title-strip {
+    .fp2a-title-strip {
 
         font-size: 17px;
 
@@ -1174,7 +1184,7 @@
     }
 
 
-    .fp2-progress {
+    .fp2a-progress {
 
         font-size: 16px;
 
@@ -1185,7 +1195,7 @@
     }
 
 
-    .fp2-main-content {
+    .fp2a-main-content {
 
         grid-template-columns: 1fr;
 
@@ -1196,27 +1206,27 @@
     }
 
 
-    .fp2-teacher-section {
+    .fp2a-teacher-section {
 
         height: auto;
 
-        order: 1;
-
     }
 
 
-    .fp2-teacher-image-wrapper {
+    .fp2a-teacher-image-wrapper {
 
-        height: 230px;
+        height: 210px;
 
         width: 100%;
 
-        margin-top: -8px;
+        margin-top: 0;
+
+        transform: none;
 
     }
 
 
-    .fp2-teacher-image {
+    .fp2a-teacher-image {
 
         max-height: 230px;
 
@@ -1225,7 +1235,7 @@
     }
 
 
-    .fp2-teacher-bubble {
+    .fp2a-teacher-bubble {
 
         width: 90%;
 
@@ -1235,35 +1245,44 @@
 
         padding: 14px 17px;
 
-        margin-top: -3px;
+        margin-top: 0;
 
     }
 
 
-    .fp2-teacher-bubble strong {
+    .fp2a-teacher-bubble strong {
 
         font-size: 21px;
 
     }
 
 
-    .fp2-teacher-bubble p {
+    .fp2a-teacher-bubble p {
 
         font-size: 15px;
 
     }
 
 
-    .fp2-question-section {
-
-        order: 2;
+    .fp2a-question-section {
 
         padding-top: 0;
+
+        transform: none;
 
     }
 
 
-    .fp2-question-card {
+    .fp2a-options {
+
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+
+    }
+
+
+    .fp2a-question-card {
 
         padding: 20px 17px;
 
@@ -1272,7 +1291,7 @@
     }
 
 
-    .fp2-question-card h2 {
+    .fp2a-question-card h2 {
 
         font-size: 27px;
 
@@ -1281,7 +1300,7 @@
     }
 
 
-    .fp2-clue {
+    .fp2a-clue {
 
         font-size: 18px;
 
@@ -1292,7 +1311,7 @@
     }
 
 
-    .fp2-option {
+    .fp2a-option {
 
         min-height: 100px;
 
@@ -1314,14 +1333,14 @@
     }
 
 
-    .fp2-title-area h1 {
+    .fp2a-title-area h1 {
 
         font-size: 30px;
 
     }
 
 
-    .fp2-title-strip {
+    .fp2a-title-strip {
 
         font-size: 15px;
 
@@ -1330,8 +1349,8 @@
     }
 
 
-    .fp2-back-button,
-    .fp2-skip-button {
+    .fp2a-back-button,
+    .fp2a-skip-button {
 
         padding: 10px 17px;
 
@@ -1340,16 +1359,16 @@
     }
 
 
-    .fp2-teacher-image-wrapper {
+    .fp2a-teacher-image-wrapper {
 
         height: 205px;
 
-        margin-top: -10px;
+        margin-top: 0;
 
     }
 
 
-    .fp2-teacher-image {
+    .fp2a-teacher-image {
 
         width: 160px;
 
@@ -1358,7 +1377,7 @@
     }
 
 
-    .fp2-teacher-bubble {
+    .fp2a-teacher-bubble {
 
         width: 95%;
 
@@ -1367,21 +1386,21 @@
     }
 
 
-    .fp2-question-card {
+    .fp2a-question-card {
 
         padding: 17px 13px;
 
     }
 
 
-    .fp2-question-card h2 {
+    .fp2a-question-card h2 {
 
         font-size: 24px;
 
     }
 
 
-    .fp2-clue {
+    .fp2a-clue {
 
         font-size: 16px;
 
@@ -1390,7 +1409,14 @@
     }
 
 
-    .fp2-option {
+    .fp2a-options {
+
+        gap: 10px;
+
+    }
+
+
+    .fp2a-option {
 
         min-height: 95px;
 
@@ -1399,14 +1425,14 @@
     }
 
 
-    .fp2-option-icon {
+    .fp2a-option-icon {
 
         font-size: 34px;
 
     }
 
 
-    .fp2-option-letter {
+    .fp2a-option-letter {
 
         width: 34px;
 
@@ -1418,19 +1444,160 @@
 
 }
 
+
+/* =====================================================
+        EXTRA SMALL MOBILE (320px)
+===================================================== */
+
+@media (max-width: 320px) {
+
+    .favourite-place-activity2-page {
+
+        padding: 8px;
+
+    }
+
+
+    .favourite-place-activity2-card {
+
+        padding: 12px;
+
+        border-radius: 18px;
+
+    }
+
+
+    .fp2a-title-area h1 {
+
+        font-size: 26px;
+
+    }
+
+
+    .fp2a-title-strip {
+
+        font-size: 13px;
+
+        padding: 6px 12px;
+
+        white-space: normal;
+
+        word-break: break-word;
+
+    }
+
+
+    .fp2a-back-button,
+    .fp2a-skip-button {
+
+        padding: 8px 14px;
+
+        font-size: 13px;
+
+    }
+
+
+    .fp2a-progress {
+
+        font-size: 14px;
+
+        padding: 5px 14px;
+
+    }
+
+
+    .fp2a-teacher-image {
+
+        width: 140px;
+
+        max-height: 180px;
+
+    }
+
+
+    .fp2a-teacher-bubble {
+
+        width: 95%;
+
+        padding: 12px 14px;
+
+        font-size: 14px;
+
+    }
+
+
+    .fp2a-question-card {
+
+        padding: 14px 10px;
+
+    }
+
+
+    .fp2a-question-card h2 {
+
+        font-size: 22px;
+
+    }
+
+
+    .fp2a-clue {
+
+        font-size: 15px;
+
+        padding: 12px;
+
+    }
+
+
+    .fp2a-options {
+
+        gap: 8px;
+
+    }
+
+
+    .fp2a-option {
+
+        min-height: 90px;
+
+        font-size: 15px;
+
+    }
+
+
+    .fp2a-option-icon {
+
+        font-size: 30px;
+
+    }
+
+
+    .fp2a-option-letter {
+
+        width: 30px;
+
+        height: 30px;
+
+        font-size: 15px;
+
+    }
+
+}
+
+
 /* =========================================
    HEADER MUST STAY ABOVE ALL CONTENT
 ========================================= */
 
-.fp2-activity-header {
+.fp2a-activity-header {
     position: relative;
     z-index: 100;
     pointer-events: auto;
 }
 
 
-.fp2-back-button,
-.fp2-skip-button {
+.fp2a-back-button,
+.fp2a-skip-button {
     position: relative;
     z-index: 101;
     pointer-events: auto;

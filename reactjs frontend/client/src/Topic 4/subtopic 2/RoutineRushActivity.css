@@ -116,6 +116,32 @@
   justify-content: center;
 }
 
+/* Override global App.css .back-btn (dark green !important) and .skip-btn (orange)
+   so both header buttons share identical styling within the flex row */
+.routine-header .back-btn {
+  background: #f59e0b !important;
+  color: #fff !important;
+  margin-top: 0 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 15px 25px !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+}
+
+.routine-header .skip-btn {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  background: #f59e0b !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 15px 25px !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+}
+
 .routine-title {
   position: absolute;
   top: 0;
@@ -1247,7 +1273,7 @@
 
 @media (max-width: 600px) {
   .routine-rush-card {
-    min-height: 700px;
+    min-height: auto;
   }
 
   .routine-header {
@@ -1255,17 +1281,38 @@
     height: 55px;
   }
 
+  .routine-header .back-btn,
+  .routine-header .skip-btn {
+    min-width: 75px;
+    background: #f59e0b !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 16px !important;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+  }
+
+  .routine-title {
+    gap: 5px;
+    padding: 0 8px;
+  }
+
   .routine-title h1 {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .title-sun {
-    font-size: 17px;
+    font-size: 14px;
   }
 
   .routine-btn {
     padding: 8px 10px;
     font-size: 11px;
+    gap: 5px;
   }
 
   .routine-subtitle {
@@ -1626,7 +1673,7 @@
   .routine-rush-card-activity {
     width: 100vw;
     height: 100vh;
-    min-height: 700px;
+    min-height: auto;
     margin: 0;
     border-radius: 0;
   }
@@ -1637,7 +1684,7 @@
 }
 
 /* =====================================================
-   MOBILE ACTIVITY FIX
+    MOBILE ACTIVITY FIX
 ===================================================== */
 
 @media (max-width: 600px) {
@@ -1648,13 +1695,169 @@
     height: 100%;
     transform: none;
     border-radius: 0;
+    overflow: visible;
   }
 
   .routine-rush-card-activity {
     width: 100vw;
     height: 100vh;
-    min-height: 700px;
+    min-height: auto;
     border-radius: 0;
+  }
+
+  /* Timer below header/subtitle, right side */
+  .routine-activity-layout .routine-timer {
+    top: 90px;
+    right: 2%;
+    width: 30%;
+    min-width: 0;
+  }
+
+  /* Progress below timer, right side */
+  .routine-activity-layout .routine-progress {
+    top: 210px;
+    right: 2%;
+    width: 32%;
+    min-width: 0;
+  }
+
+  /* Score bottom-right */
+  .routine-activity-layout .routine-score {
+    right: 2%;
+    left: auto;
+    bottom: 8px;
+    width: 20%;
+    min-width: 0;
+    padding: 6px 3px;
+  }
+
+  .routine-activity-layout .routine-score img {
+    max-height: 40px;
+    margin-top: -30%;
+  }
+
+  .routine-activity-layout .score-label {
+    font-size: 9px;
+  }
+
+  .routine-activity-layout .score-value {
+    font-size: 16px;
+  }
+
+  /* Teacher at bottom-left */
+  .routine-activity-layout .routine-teacher {
+    bottom: 40px;
+    left: 0;
+    width: 55%;
+    height: 200px;
+  }
+
+  /* Speech bubble: wider for readability */
+  .routine-activity-layout .teacher-speech {
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 85px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    gap: 5px;
+  }
+
+  .routine-activity-layout .teacher-speech p {
+    font-size: 10px;
+  }
+
+  .routine-activity-layout .teacher-speech strong {
+    font-size: 13px;
+  }
+
+  .routine-activity-layout .routine-repeat-button {
+    font-size: 12px;
+  }
+
+  .routine-activity-layout .speech-tail {
+    left: 50%;
+    bottom: -20px;
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .routine-activity-layout .teacher-image {
+    width: 60%;
+    height: 140px;
+    margin-top: 20px;
+  }
+
+  .routine-activity-layout .teacher-name {
+    font-size: 10px;
+    padding: 5px 9px;
+  }
+
+  /* Game area: scrollable with defined top */
+  .routine-activity-layout .routine-game-area {
+    top: 280px;
+    left: 3%;
+    right: 3%;
+    bottom: 45px;
+    max-height: calc(100% - 325px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .routine-activity-layout .routine-options {
+    gap: 8px;
+  }
+
+  .routine-activity-layout .routine-option {
+    min-height: 90px;
+    padding: 8px 3px;
+    border-radius: 12px;
+  }
+
+  .routine-activity-layout .routine-option img {
+    width: 80%;
+    height: 45px;
+  }
+
+  .routine-activity-layout .routine-option span:last-child {
+    font-size: 10px;
+  }
+
+  .routine-activity-layout .option-number {
+    width: 23px;
+    height: 23px;
+    font-size: 12px;
+    top: 5px;
+    left: 5px;
+  }
+
+  .routine-activity-layout .question-title {
+    font-size: 13px;
+    padding: 6px 9px;
+    margin-bottom: 10px;
+  }
+
+  .routine-activity-layout .routine-feedback {
+    bottom: 0;
+    max-width: 90%;
+    min-width: 0;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .routine-activity-layout .routine-instruction {
+    left: 20%;
+    right: 20%;
+    bottom: 8px;
+    font-size: 9px;
+    padding: 5px;
+  }
+
+  .routine-activity-layout .round-badge {
+    top: 10px;
+    font-size: 13px;
+    padding: 6px 18px;
   }
 }
 

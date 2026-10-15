@@ -471,3 +471,86 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .sentence-repair-teacher-intro-card {
+
+        width: 95%;
+
+        min-height: auto;
+
+        padding: 20px;
+
+    }
+
+
+    .sentence-repair-teacher-image {
+
+        width: 185px;
+
+        height: 185px;
+
+    }
+
+
+    .sentence-repair-teacher-speech-bubble {
+
+        min-height: 190px;
+
+        padding: 20px 24px;
+
+    }
+
+
+    .sentence-repair-teacher-name {
+
+        font-size: 17px;
+
+    }
+
+
+    .sentence-repair-teacher-speech-bubble p {
+
+        font-size: 16px;
+
+    }
+
+}
+
+
+@media (max-width: 320px) {
+
+    .sentence-repair-teacher-intro-card {
+
+        padding: 15px;
+
+    }
+
+
+    .sentence-repair-teacher-image {
+
+        width: 165px;
+
+        height: 165px;
+
+    }
+
+
+    .sentence-repair-teacher-speech-bubble {
+
+        min-height: 170px;
+
+        padding: 16px 20px;
+
+    }
+
+
+    .sentence-repair-teacher-speech-bubble p {
+
+        font-size: 14px;
+
+    }
+
+}

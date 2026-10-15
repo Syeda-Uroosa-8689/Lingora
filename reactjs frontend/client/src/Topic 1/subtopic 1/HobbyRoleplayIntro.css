@@ -153,3 +153,23 @@
     }
 
 }
+
+
+@media (max-width: 480px) {
+
+    .hobby-roleplay-popup {
+
+        width: 95%;
+
+        height: 230px;
+
+    }
+
+
+    .hobby-roleplay-popup h1 {
+
+        font-size: 28px;
+
+    }
+
+}

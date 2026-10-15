@@ -26,13 +26,12 @@ function FavouritePlaceActivity3Intro({ onFinish }) {
   }, [onFinish]);
 
   return (
-    <div className="favourite-place-activity3-intro-container">
-
+    <div className="favourite-place-intro-container">
       <div
         className={
           show
-            ? "favourite-place-activity3-intro-popup show"
-            : "favourite-place-activity3-intro-popup"
+            ? "favourite-place-intro-popup show"
+            : "favourite-place-intro-popup"
         }
       >
         <h1>
@@ -41,7 +40,6 @@ function FavouritePlaceActivity3Intro({ onFinish }) {
           Your Favourite Place
         </h1>
       </div>
-
     </div>
   );
 }

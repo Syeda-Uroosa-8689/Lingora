@@ -8,6 +8,7 @@
     width:100%;
 
     height:100vh;
+    min-height:100dvh;
 
     background:url("./assets/chatbg.jpeg") center/cover no-repeat;
 
@@ -46,6 +47,7 @@
     max-width:1450px;
 
     height:90vh;
+    max-height:calc(100dvh - 40px);
 
     background:#F5E8D7;
 
